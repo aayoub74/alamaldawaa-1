@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<template id="report_invoice_bouns_inherit" inherit_id="account.report_invoice_document">
+			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Quantity')]]" position="after">
+				<t t-if="o.type == 'out_invoice'">
+					<th class="text-right">Bonus</th>
+				</t>
+			</xpath>
+			<xpath expr="//span[@t-field='l.quantity']" position="after">
+				<t t-if="o.type == 'out_invoice'">
+					<span t-field="l.bonus"/>
+				</t>
+			</xpath>
+		</template>
+	</data>
+</odoo>

@@ -1,0 +1,207 @@
+<odoo>
+    <data>
+        <!-- Product -->
+        <record id="view_product_temp_form_inherit" model="ir.ui.view">
+            <field name="name">Product Form View Extra Info</field>
+            <field name="model">product.template</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <page name="general_information" position="after">
+                    <page name="extra_information" string="Extra Information">
+                        <group col="4">
+                            <field name="pharma_form"/>
+                            <field name="storage_conditions"/>
+                            <field name="container"/>
+                            <field name="container_vol"/>
+                            <field name="manufacturer"/>
+                            <field name="origin"/>
+                            <field name="agent"/>
+                            <field name="marketing_company"/>
+                            <field name="conc"/>
+                            <field name="conc_unit"/>
+                        </group>
+                    </page>
+                </page>
+            </field>
+        </record>
+        <record id="view_product_temp_kanban_inherit" model="ir.ui.view">
+            <field name="name">Product Kanban View Display name</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_kanban_details']/strong" position="replace">
+                    <strong>
+                        <field name="name"/>
+                        <span t-if="record.default_code.value">[
+                            <field name="default_code"/>
+                            ]</span>
+                    </strong>
+                </xpath>
+            </field>
+        </record>
+        <!-- Purhcase -->
+        <record id="view_purcase_form_inherit" model="ir.ui.view">
+            <field name="name">view_purcase_form_inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <button name="button_approve" position="attributes">
+                    <attribute name="groups">alda_enhance.alda_gm</attribute>
+                </button>
+                <form position="inside">
+                    <field invisible="1" name="cfo_emails"/>
+                </form>
+                <!-- Bonus and Cost -->
+                <field name="product_qty" position="after">
+                    <field name="bonus"/>
+                    <field name="total_qty"/>
+                </field>
+                <field name="price_subtotal" position="after">
+                    <field name="total_av_cost" widget="monetary"/>
+                </field>
+            </field>
+        </record>
+        <!-- Invoice -->
+        <record id="view_vendor_invoice_form_inherit" model="ir.ui.view">
+            <field name="name">view_vendor_invoice_form_inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <field name="quantity" position="after">
+                    <field name="bonus"/>
+                </field>
+            </field>
+        </record>
+        <!-- Stock -->
+        <!-- Life Date in Pack Operation-->
+        <record id="view_stock_pack_operation_form_inherit" model="ir.ui.view">
+            <field name="name">view_stock_pack_operation_form_inherit</field>
+            <field name="model">stock.pack.operation</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="stock.view_pack_operation_lot_form"/>
+            <field name="arch" type="xml">
+                <field name="lot_name" position="after">
+                    <field invisible="not context.get('only_create', False)" name="life_date" required="context.get('only_create', False)"/>
+                </field>
+            </field>
+        </record>
+        <!-- Production Date in Lots-->
+        <delete search="view_lot_form_production_inherit" model="ir.ui.view"/>
+        
+        <!-- Life Date in Quant-->
+        <record id="view_quant_form_production_inherit" model="ir.ui.view">
+            <field name="name">view_quant_form_production_inherit</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='lot_id']" position="after">
+                    <field name="life_date"/>
+                    <field name="expiry_state"/>
+                </xpath>
+            </field>
+        </record>
+        <!-- <record id="product_expiry.view_move_form_expiry" model="ir.ui.view">
+            <field name="name">stock.production.lot.form</field>
+            <field name="model">stock.production.lot</field>
+            <field name="inherit_id" ref="stock.view_production_lot_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='main_group']" position="after">
+                    <group string="Dates">
+                        <group>
+                            <field name="alert_date"/>
+                            <field name="removal_date"/>
+                        </group>
+                        <group>
+                            <field name="use_date"/>
+                            <field name="life_date"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record> -->
+        <!-- Expiry States-->
+        <record id="product_expiry_state_tree_view" model="ir.ui.view">
+            <field name="name">product.expiry.state.tree.view</field>
+            <field name="model">stock.production.lot</field>
+            <field name="inherit_id" ref="stock.view_production_lot_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="colors">orange: expiry_state == 'best_before';
+                        blue: expiry_state == 'alert';
+                        gold: expiry_state == 'to_remove';
+                        green: expiry_state == 'normal';
+                        red: expiry_state == 'expired'
+                    </attribute>
+                </xpath>
+                <field name="create_date" position="after">
+                    <field name="life_date"/>
+                    <field name="expiry_state"/>
+                </field>
+            </field>
+        </record>
+        <!-- Reomval,alert and expiry Filter -->
+        <record id="stock_production_lot_expiry_search_view" model="ir.ui.view">
+            <field name="name">stock.production.lot.expiry.search</field>
+            <field name="model">stock.production.lot</field>
+            <field name="inherit_id" ref="stock.search_product_lot_filter"/>
+            <field name="arch" type="xml">
+                <field name="product_id" position="after">
+                    <field name="expiry_state"/>
+                    <filter context="{}" domain="[('alert_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('alert_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]" help="" name="in_alert_this_month" string="In Alert This Month"/>
+                    <filter context="{}" domain="[('removal_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('removal_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]" help="" name="to_remove_this_month" string="To Remove This Month"/>
+                    <filter context="{}" domain="[('life_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('life_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]" help="" name="expiry_this_month" string="Expires This Month"/>
+                    <filter domain="[                                 '&amp;',                                 ('alert_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('alert_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]" name="in_alert_this_week" string="In Alert This Week"/>
+                    <filter domain="[                                 '&amp;',                                 ('removal_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('removal_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]" name="to_remove_this_week" string="To Remove This Week"/>
+                    <filter domain="[                                 '&amp;',                                 ('life_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('life_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]" name="expiry_this_week" string="Expires This Week"/>
+                </field>
+            </field>
+        </record>
+        <!-- Lot Return -->
+        <record id="view_form_lot_return" model="ir.ui.view">
+            <field name="name">view.form.lot.return</field>
+            <field name="model">stock.production.lot</field>
+            <field name="inherit_id" ref="stock.view_production_lot_form"/>
+            <field name="arch" type="xml">
+                <sheet position='before'>
+                    <header>
+                        <button name="%(alda_enhance.act_stock_return_quant)d" type='action' string="Return" class="oe_highlight"/>
+                    </header>
+                </sheet>
+            </field>
+        </record>
+
+        <!-- Quant tree-->
+        <record id="quant_expiry_tree_view" model="ir.ui.view">
+            <field name="name">quant.expiry.tree.view</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='lot_id']" position="after">
+                    <field name="life_date"/>
+                    <field name="expiry_state"/>
+                </xpath>
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="colors">orange: expiry_state == 'best_before';
+                        blue: expiry_state == 'alert';
+                        gold: expiry_state == 'to_remove';
+                        green: expiry_state == 'normal';
+                        red: expiry_state == 'expired'
+                    </attribute>
+                </xpath>
+            </field>
+        </record>
+        <record id="stock_quant_expiry_search_view" model="ir.ui.view">
+            <field name="name">stock.quant.expiry.search</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.quant_search_view"/>
+            <field name="arch" type="xml">
+                <field name="lot_id" position="after">
+                    <field name="expiry_state"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

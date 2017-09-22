@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data noupdate="0">
+    	<!-- Server Actions-->
+    	<!-- Send Nofifcation Email for 24 hours not confirmed PO-->
+    	<record id="action_notify_po_server" model="ir.actions.server">
+    	    <field name="type">ir.actions.server</field>
+    	    <field name="name">Send Notification Email for Not Confirmed PO order</field>
+    	    <field name="model_id" ref="purchase.model_purchase_order" />
+    	    <field name="condition">record.state in ['draft','sent','to approve'] </field>
+    	    <field name="sequence" eval="1" />
+    	    <field name="state">email</field>
+    	    <field name="template_id" ref="alda_enhance.email_template_notify_draft_po" />
+    	</record>
+
+
+
+    	<!-- Auto Action -->
+    	<!-- Add Folowers to PO-->
+    	<record id="auto_action_po_default_follower" model="base.action.rule">
+    	    <field name="name">Add Followers To PO</field>
+    	    <field name="active" eval="True" />
+    	    <field name="sequence" eval="0" />
+    	    <field name="model_id" ref="purchase.model_purchase_order" />
+    	    <field name="kind">on_create</field>
+    	</record>
+
+    	<record id="auto_action_notify_po" model="base.action.rule">
+    	    <field name="name">Send email for PO not confirmed after 24 hour</field>
+    	    <field name="active" eval="True" />
+    	    <field name="sequence" eval="1" />
+    	    <field name="model_id" ref="purchase.model_purchase_order" />
+    	    <field name="kind">on_time</field>
+    	    <field name="trg_date_range">1</field>
+    	    <field name="trg_date_range_type">day</field>
+    	    <field name="trg_date_id" ref="purchase.field_purchase_order_create_date"/>
+    	    <field name="server_action_ids" eval="[(4, ref('action_notify_po_server'))]" />
+
+    	</record>
+        
+
+    </data>
+</odoo>
