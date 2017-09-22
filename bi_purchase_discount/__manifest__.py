@@ -33,7 +33,8 @@
     'depends': ['base','purchase'],
     'data': [
             'purchase.xml',
-            'inherit_purchase_report.xml'
+            'inherit_purchase_report.xml',
+            'invoice_view.xml',
     ],
     'installable': True,
     'auto_install': False,

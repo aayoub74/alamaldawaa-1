@@ -13,6 +13,7 @@
 
 	<xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='product_qty']" position="after">
                        <field name="discount" />
+                       <field name="discount2" />
                 </xpath>
 
 

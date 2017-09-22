@@ -33,6 +33,7 @@
                         
                         <td class="text-right">
                             <span t-field="line.discount"/>
+                            <span t-field="line.discount2"/>
                         </td>
                         <td class="text-right">
                             <span t-field="line.price_unit"/>

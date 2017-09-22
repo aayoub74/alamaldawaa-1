@@ -25,15 +25,16 @@ from odoo.tools.float_utils import float_is_zero, float_compare
 class purchase_order_line(models.Model):
     _inherit = 'purchase.order.line'
 
-    discount = fields.Float('Discount %')
+    discount = fields.Float('Discount 1')
+    discount2 = fields.Float('Discount 2')
 
 
-    @api.depends('product_qty', 'price_unit', 'taxes_id','discount')
+    @api.depends('product_qty', 'price_unit', 'taxes_id','discount','discount2')
     def _compute_amount(self):
         for line in self:
             taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
             if line.discount:
-                discount = (line.price_unit * line.discount * line.product_qty)/100
+                discount = (line.price_unit * (line.discount+line.discount2) * line.product_qty)/100
                 line.update({
                     'price_tax': taxes['total_included'] - taxes['total_excluded'],
                     'price_total': taxes['total_included'] ,

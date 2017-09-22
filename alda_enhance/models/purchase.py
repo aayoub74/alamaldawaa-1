@@ -41,11 +41,11 @@ class PurhcaseOrderLine (models.Model):
 			if record.total_qty:
 				record.bonus_ratio= record.bonus / record.total_qty
 
-	@api.depends('product_id','product_qty')
+	@api.depends('product_id','product_qty','bonus')
 	def _compute_total_av_cost(self):
 		''' Calcualte Total previous Average Cost'''
 		for record in self:
-			record.total_av_cost = record.product_qty * record.product_id.standard_price
+			record.total_av_cost = (record.product_qty + record.bonus) * record.product_id.standard_price
 
 
 
@@ -56,8 +56,7 @@ class PurhcaseOrderLine (models.Model):
 		price_unit = super(PurhcaseOrderLine, self)._get_stock_move_price_unit()
 		line = self[0]
 		price_unit -=  price_unit * (line.bonus / line.total_qty)
-		if float_compare(line.discount,0.0,2) > 0:
-			price_unit -= (price_unit * (line.discount / 100))
+		price_unit -= (price_unit * ( (line.discount+line.discount2) / 100))
 		return price_unit
 
 	@api.multi
