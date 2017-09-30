@@ -34,7 +34,7 @@ class purchase_order_line(models.Model):
         for line in self:
             taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
             if line.discount:
-                discount = (line.price_unit * (line.discount+line.discount2) * line.product_qty)/100
+                discount = (line.price_unit * (line.discount*line.discount2) * line.product_qty)/100
                 line.update({
                     'price_tax': taxes['total_included'] - taxes['total_excluded'],
                     'price_total': taxes['total_included'] ,

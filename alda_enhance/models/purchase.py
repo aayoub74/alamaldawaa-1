@@ -1,5 +1,6 @@
 from odoo import models, fields, api
-from odoo.tools.float_utils import float_is_zero, float_compare
+from odoo.tools.float_utils import float_is_zero, float_compare,float_round
+from odoo.addons import decimal_precision as dp
 
 
 from odoo.tools.translate import _
@@ -14,21 +15,22 @@ class PurhcaseOrderLine (models.Model):
 	bonus = fields.Float(string='Bonus',digits=(16, 2))
 	total_qty  = fields.Float(
 		string='Total Qty',
-		digits=(16, 2),
-		compute='_compute_total'
+		digits=dp.get_precision('Product Unit of Measure'),
+		compute='_compute_total',
 		
 	)
 	total_av_cost = fields.Float(
 	    string='Total Average Cost',
-	    digits=(16, 2),
+	    digits=dp.get_precision('Product Unit of Measure'),
 	    compute='_compute_total_av_cost',
 	    store=True,
 
 	)
 	bonus_ratio = fields.Float(
 		string='Bonus Ratio',
-		digits=(16, 4),
-		compute='_compute_total'
+		digits=dp.get_precision('Product Unit of Measure'),
+		compute='_compute_total',
+		default = 0.0,
 		
 	)
 
@@ -56,7 +58,7 @@ class PurhcaseOrderLine (models.Model):
 		price_unit = super(PurhcaseOrderLine, self)._get_stock_move_price_unit()
 		line = self[0]
 		price_unit -=  price_unit * (line.bonus / line.total_qty)
-		price_unit -= (price_unit * ( (line.discount+line.discount2) / 100))
+		price_unit -= (price_unit * ( (line.discount*line.discount2) / 100))
 		return price_unit
 
 	@api.multi
@@ -113,6 +115,7 @@ class PurhcaseOrderLine (models.Model):
 				diff_quantity -= min(procurement_qty, diff_quantity)
 		if float_compare(diff_quantity, 0.0,  precision_rounding=self.product_uom.rounding) > 0:
 			template['product_uom_qty'] = diff_quantity
+			template['bouns'] = self.bonus
 			res.append(template)
 		return res
 

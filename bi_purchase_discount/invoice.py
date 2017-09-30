@@ -17,7 +17,7 @@ class AccountInvoiceLine(models.Model):
         'invoice_id.date_invoice')
     def _compute_price(self):
         currency = self.invoice_id and self.invoice_id.currency_id or None
-        price = self.price_unit * (1 - ( (self.discount+self.discount2) or 0.0) / 100.0)
+        price = self.price_unit * (1 - ( (self.discount*self.discount2) or 0.0) / 100.0)
         taxes = False
         if self.invoice_line_tax_ids:
             taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
@@ -35,7 +35,7 @@ class AccountInvoice(models.Model):
     def get_taxes_values(self):
         tax_grouped = {}
         for line in self.invoice_line_ids:
-            price_unit = line.price_unit * (1 - ( (line.discount+line.discount2) or 0.0) / 100.0)
+            price_unit = line.price_unit * (1 - ( (line.discount*line.discount2) or 0.0) / 100.0)
             taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
             for tax in taxes:
                 val = self._prepare_tax_line_vals(line, tax)

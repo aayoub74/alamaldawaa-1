@@ -2,6 +2,7 @@ from odoo import models, fields, api
 from odoo.tools.translate import _
 from odoo.exceptions import UserError
 from odoo.addons import decimal_precision as dp
+from odoo.tools.float_utils import float_round,float_compare
 
 from logging import getLogger
 
@@ -17,6 +18,24 @@ class ReturnQuantLine(models.TransientModel):
     quant_id = fields.Many2one('stock.quant','Quant')
     warehouse_id = fields.Many2one('stock.warehouse',compute='_get_warehouse')
     location_id = fields.Many2one('stock.location',string="Location")
+    orig_qty = fields.Float(
+        'Original Qty', 
+        digits=dp.get_precision('Product Unit of Measure'),
+        compute='_get_qty_bouns',
+        )
+    bouns = fields.Float(
+        'Bouns', 
+        digits=dp.get_precision('Product Unit of Measure'),
+        compute='_get_qty_bouns',
+        )
+
+    @api.depends('quantity')
+    def _get_qty_bouns(self):
+        for line in self:
+            if line.quantity:
+                line.bouns = float_round(value=line.quantity*line.wizard_id.b_ratio,
+                    precision_digits=0)
+                line.orig_qty = line.quantity - line.bouns
 
     @api.depends('quant_id')
     def _get_warehouse(self):
@@ -32,6 +51,7 @@ class ReturnQuant(models.TransientModel):
     location_id = fields.Many2one(
         'stock.location', 'Return Location',
         domain="[('usage', '=', 'supplier')]",required=True)
+    b_ratio = fields.Float('Bouns Ratio',digits=(16,3),default=0.0)
 
     @api.model
     def default_get(self, fields):
@@ -45,13 +65,15 @@ class ReturnQuant(models.TransientModel):
         lot = lot_obj.browse(self.env.context.get('active_id'))
         if lot:
             for quant in lot.quant_ids.filtered(lambda qu:qu.location_id.usage in ['internal','transit'] and not qu.reservation_id):
-                product_return_moves.append((0, 0, {'product_id': quant.product_id.id, 'quantity': quant.qty, 'quant_id':quant.id,'location_id':quant.location_id.id}))
+                product_return_moves.append((0, 0, {'product_id': quant.product_id.id, 'quantity': 0.0, 'quant_id':quant.id,'location_id':quant.location_id.id}))
             if not product_return_moves:
                 raise UserError(_("No products to return (only lines in Done state and not fully returned yet can be returned)!"))
             if 'product_return_moves' in fields:
                 res.update({'product_return_moves': product_return_moves})
             if 'lot_id' in fields:
                 res.update({'lot_id':lot.id})
+            if 'b_ratio' in fields:
+                res.update({'b_ratio':lot.b_ratio})
         return res
         
     @api.multi
@@ -63,8 +85,6 @@ class ReturnQuant(models.TransientModel):
         move_obj = self.env['stock.move']
         warehouses = self.product_return_moves.mapped('warehouse_id')
         res = []
-        # _logger.error('--------warehouse-----------')
-        # _logger.error(warehouses)
 
 
         for warehouse in warehouses:
@@ -115,8 +135,15 @@ class ReturnQuant(models.TransientModel):
                         'ordered_qty':qty,
                         'location_id':return_line.quant_id.location_id.id,
                         'location_dest_id':self.location_id.id,
+                        'orig_qty':return_line.orig_qty,
+                        'bouns':return_line.bouns,
                     }
-                    operation = self.env['stock.pack.operation'].create(op_vals)
+                    #print op_vals
+                    #import pdb;pdb.set_trace()
+                    ctx_op = dict(self.env.context)
+                    ctx_op.update({'stop':True})
+                    operation = self.env['stock.pack.operation'].with_context(ctx_op).create(op_vals)
+
                     #create stock.pack.operation.lot and with lot id and link it to operation
                     op_lot_vals={
                         'operation_id':operation.id,
@@ -141,7 +168,7 @@ class ReturnQuant(models.TransientModel):
             picking.action_confirm()
             #import pdb; pdb.set_trace()
             ctx = dict(self.env.context)
-            ctx.update({'reserve_only_ops':True,})
+            ctx.update({'reserve_only_ops':True,'no_prepare':True})
             picking.with_context(ctx).action_assign()
             res.append((picking.id, picking_type.id))
         return res

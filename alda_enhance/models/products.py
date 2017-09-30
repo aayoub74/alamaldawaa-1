@@ -4,8 +4,6 @@ from odoo import models, fields, api,exceptions
 from odoo.tools.translate import _
 
 class ProductProductInherit(models.Model):
-    
-
     _inherit = 'product.product'
 
     @api.multi

@@ -6,6 +6,7 @@
 
 from odoo import models, fields, api
 from odoo.tools.translate import _
+from odoo.addons import decimal_precision as dp
 from logging import getLogger
 
 _logger = getLogger(__name__)
@@ -26,7 +27,7 @@ class InvoiceLine(models.Model):
 	bonus = fields.Float(
 	    string='Bonus',
 	    default=0.0,
-	    digits=(16, 2),
+	    digits=dp.get_precision('Product Unit of Measure'),
 	)
 
 
