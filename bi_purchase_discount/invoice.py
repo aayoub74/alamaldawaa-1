@@ -2,6 +2,7 @@ from odoo import models, fields, api
 from odoo.tools.translate import _
 import odoo.addons.decimal_precision as dp
 
+
 class AccountInvoiceLine(models.Model):
 
     _inherit = 'account.invoice.line'
@@ -9,15 +10,15 @@ class AccountInvoiceLine(models.Model):
     discount = fields.Float(string='Discount 1', digits=dp.get_precision('Discount'),default=0.0)
     discount2 = fields.Float(string='Discount 2', digits=dp.get_precision('Discount'),default=0.0)
 
-
-
     @api.one
-    @api.depends('price_unit', 'discount','discount2','invoice_line_tax_ids', 'quantity',
-        'product_id', 'invoice_id.partner_id', 'invoice_id.currency_id', 'invoice_id.company_id',
-        'invoice_id.date_invoice')
+    @api.depends('price_unit', 'discount', 'discount2', 'invoice_line_tax_ids', 'quantity',
+                 'product_id', 'invoice_id.partner_id', 'invoice_id.currency_id', 'invoice_id.company_id',
+                 'invoice_id.date_invoice')
     def _compute_price(self):
         currency = self.invoice_id and self.invoice_id.currency_id or None
-        price = self.price_unit * (1 - ( (self.discount*self.discount2) or 0.0) / 100.0)
+        d1 = self.discount / 100.0
+        d2 = self.discount2 / 100.0
+        price = self.price_unit * (1 - d1-d2+d1*d2)
         taxes = False
         if self.invoice_line_tax_ids:
             taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
@@ -27,6 +28,7 @@ class AccountInvoiceLine(models.Model):
         sign = self.invoice_id.type in ['in_refund', 'out_refund'] and -1 or 1
         self.price_subtotal_signed = price_subtotal_signed * sign
 
+
 class AccountInvoice(models.Model):
 
     _inherit = 'account.invoice'
@@ -35,7 +37,9 @@ class AccountInvoice(models.Model):
     def get_taxes_values(self):
         tax_grouped = {}
         for line in self.invoice_line_ids:
-            price_unit = line.price_unit * (1 - ( (line.discount*line.discount2) or 0.0) / 100.0)
+            d1 = line.discount / 100.0
+            d2 = line.discount2 / 100.0
+            price_unit = line.price_unit * (1 - d1-d2+d1*d2)
             taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
             for tax in taxes:
                 val = self._prepare_tax_line_vals(line, tax)
@@ -47,10 +51,10 @@ class AccountInvoice(models.Model):
                     tax_grouped[key]['amount'] += val['amount']
                     tax_grouped[key]['base'] += val['base']
         return tax_grouped
-    
 
     def _prepare_invoice_line_from_po_line(self, line):
-    	res = super(AccountInvoice, self)._prepare_invoice_line_from_po_line(line)
-    	res['discount'] = line.discount
-    	res['discount2'] = line.discount2
-    	return res
+
+        res = super(AccountInvoice, self)._prepare_invoice_line_from_po_line(line)
+        res['discount'] = line.discount
+        res['discount2'] = line.discount2
+        return res

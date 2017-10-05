@@ -211,8 +211,8 @@ class StockPackOperation(models.Model):
 
     @api.onchange('bouns')
     def _set_orig_qty(self):
-        import pdb;pdb.set_trace()
-        print 'bouns',self.bouns,self.qty_done,self.product_qty
+        #import pdb;pdb.set_trace()
+        #print 'bouns',self.bouns,self.qty_done,self.product_qty
         if self.bouns <= self.qty_done:
             self.orig_qty = self.qty_done - self.bouns
         elif self.bouns <= self.product_qty:
@@ -221,8 +221,8 @@ class StockPackOperation(models.Model):
 
     @api.onchange('orig_qty')
     def _set_bouns_qty(self):
-        import pdb;pdb.set_trace()
-        print 'orig_qty',self.orig_qty,self.qty_done,self.product_qty
+        #import pdb;pdb.set_trace()
+        #print 'orig_qty',self.orig_qty,self.qty_done,self.product_qty
         if self.orig_qty <= self.qty_done:
             self.bouns = self.qty_done - self.orig_qty
         elif self.orig_qty <= self.product_qty:
@@ -231,7 +231,7 @@ class StockPackOperation(models.Model):
 
     @api.multi
     def write(self,vals):
-        import pdb;pdb.set_trace()
+        #import pdb;pdb.set_trace()
         if self.env.context.get('compute_qty',False):
             self.ensure_one()
             if self.qty_done:
