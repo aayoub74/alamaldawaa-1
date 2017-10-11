@@ -40,7 +40,7 @@
                 </xpath>
             </field>
         </record>
-        <!-- Purhcase -->
+        <!-- Purchase -->
         <record id="view_purcase_form_inherit" model="ir.ui.view">
             <field name="name">view_purcase_form_inherit</field>
             <field name="model">purchase.order</field>
@@ -63,7 +63,29 @@
                 </field>
             </field>
         </record>
-        <!-- Invoice -->
+        <!-- Sales discount-->
+        <record id="view_sale_order_form_inherit" model="ir.ui.view">
+            <field name="name">view_sale_order_form_inherit</field>
+            <field name="model">sale.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
+                    <field name="discount2" groups="sale.group_discount_per_so_line"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                    <field name="bonus"/>
+                </xpath>
+
+               <xpath expr="//div[@name='discount']" position="after">
+                    <label for="discount2" groups="sale.group_discount_per_so_line"/>
+                    <div name="discount2" groups="sale.group_discount_per_so_line">
+                        <field name="discount2" class="oe_inline"/> %
+                    </div>
+                </xpath>
+            </field>
+        </record>
+        <!-- Invoice bonus and discounts-->
         <record id="view_vendor_invoice_form_inherit" model="ir.ui.view">
             <field name="name">view_vendor_invoice_form_inherit</field>
             <field name="model">account.invoice</field>
@@ -75,6 +97,9 @@
                 </field>
             </field>
         </record>
+
+
+
         <!-- Stock -->
 
         <!-- Life Date in Pack Operation-->
@@ -205,12 +230,16 @@
             </field>
         </record>
 
-        <!-- Bouns in Stock picking-->
+        <!-- Bonus in Stock picking-->
+        <!-- Cancel Force Availability -->
         <record id="stock_picking_form_view_bouns" model="ir.ui.view">
             <field name="name">stock.picking.form.view.bouns</field>
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
+                <button name="force_assign" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </button>
                 <field name="qty_done" position="after">
                     <field name="orig_qty"/>
                     <field name="bouns"/>

@@ -16,18 +16,18 @@ class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
     def _prepare_invoice_line_from_po_line(self, line):
-    	res = super(AccountInvoice, self)._prepare_invoice_line_from_po_line(line)
-    	res['bonus'] = line.bonus
-    	return res
+        res = super(AccountInvoice, self)._prepare_invoice_line_from_po_line(line)
+        res['bonus'] = line.bonus
+        return res
 
 
 class InvoiceLine(models.Model):
-	_inherit = 'account.invoice.line'
+    _inherit = 'account.invoice.line'
 
-	bonus = fields.Float(
-	    string='Bonus',
-	    default=0.0,
-	    digits=dp.get_precision('Product Unit of Measure'),
-	)
+    bonus = fields.Float(
+        string='Bonus',
+        default=0.0,
+        digits=dp.get_precision('Product Unit of Measure'),
+    )
 
 

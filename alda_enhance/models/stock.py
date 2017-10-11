@@ -108,8 +108,21 @@ class StockPackOperationLot(models.Model):
         default=lambda self :fields.Date.today(),
     )
 
+
+
 class StockProductionLotInherit1(models.Model):
     _inherit = 'stock.production.lot'
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for rec in self:
+            if rec.life_date:
+                res.append((rec.id,rec.name+ ' ' + rec.life_date))
+            else:
+                res.append((rec.id, rec.name))
+        return res
+
 
     @api.one
     @api.constrains('removal_date', 'alert_date', 'life_date', 'use_date')

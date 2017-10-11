@@ -9,7 +9,26 @@
 				<field name="discount" position="after">
 					<field name="discount2"/>
 				</field>
+				<field name="amount_untaxed" position="before">
+					<field name="before_discount"/>
+					-<field name="fixed_discount"/>
+				</field>
 			</field>
 		</record>
+		<record id="view_customer_invoice_form_inherit" model="ir.ui.view">
+            <field name="name">view_customer_invoice_form_inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <field name="discount" position="after">
+                    <field name="discount2"/>
+                </field>
+				<field name="amount_untaxed" position="before">
+					<field name="before_discount"/>
+					-<field name="fixed_discount"/>
+				</field>
+            </field>
+        </record>
 	</data>
 </odoo>
