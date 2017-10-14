@@ -7,18 +7,19 @@ class AccountInvoiceLine(models.Model):
 
     _inherit = 'account.invoice.line'
 
-    discount = fields.Float(string='Discount 1', digits=dp.get_precision('Discount'),default=0.0)
-    discount2 = fields.Float(string='Discount 2', digits=dp.get_precision('Discount'),default=0.0)
+    discount = fields.Float(string='Discount 1 (%)', digits=dp.get_precision('Discount'),default=0.0)
+    discount2 = fields.Float(string='Discount 2 (%)', digits=dp.get_precision('Discount'),default=0.0)
+    fixed_discount = fields.Float(string='Discount', digits=dp.get_precision('Discount'),default=0.0)
 
     @api.one
     @api.depends('price_unit', 'discount', 'discount2', 'invoice_line_tax_ids', 'quantity',
                  'product_id', 'invoice_id.partner_id', 'invoice_id.currency_id', 'invoice_id.company_id',
-                 'invoice_id.date_invoice')
+                 'invoice_id.date_invoice','fixed_discount')
     def _compute_price(self):
         currency = self.invoice_id and self.invoice_id.currency_id or None
         d1 = self.discount / 100.0
         d2 = self.discount2 / 100.0
-        price = self.price_unit * (1 - d1-d2+d1*d2)
+        price = self.price_unit * (1 - d1-d2+d1*d2) - self.fixed_discount/self.quantity if self.quantity else 0
         taxes = False
         if self.invoice_line_tax_ids:
             taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
@@ -32,7 +33,7 @@ class AccountInvoiceLine(models.Model):
 class AccountInvoice(models.Model):
 
     _inherit = 'account.invoice'
-    fixed_discount = fields.Float(string="Fixed Discount", digits=dp.get_precision('Discount'), default=0.0)
+    fixed_discount = fields.Float(string="Discount", digits=dp.get_precision('Discount'), default=0.0)
     before_discount = fields.Float(string="Subtotal before Discount", digits=dp.get_precision('Discount'), default=0.0,compute='_compute_amount')
 
 
@@ -62,7 +63,7 @@ class AccountInvoice(models.Model):
         for line in self.invoice_line_ids:
             d1 = line.discount / 100.0
             d2 = line.discount2 / 100.0
-            price_unit = line.price_unit * (1 - d1-d2+d1*d2)
+            price_unit = line.price_unit * (1 - d1-d2+d1*d2) - line.fixed_discount
             taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
             for tax in taxes:
                 val = self._prepare_tax_line_vals(line, tax)
@@ -75,9 +76,29 @@ class AccountInvoice(models.Model):
                     tax_grouped[key]['base'] += val['base']
         return tax_grouped
 
+    @api.onchange('purchase_id')
+    def purchase_order_change(self):
+        if not self.purchase_id:
+            return {}
+        if not self.partner_id:
+            self.partner_id = self.purchase_id.partner_id.id
+        self.fixed_discount = self.purchase_id.fixed_discount
+
+        new_lines = self.env['account.invoice.line']
+        for line in self.purchase_id.order_line - self.invoice_line_ids.mapped('purchase_line_id'):
+            data = self._prepare_invoice_line_from_po_line(line)
+            new_line = new_lines.new(data)
+            new_line._set_additional_fields(self)
+            new_lines += new_line
+
+        self.invoice_line_ids += new_lines
+        self.purchase_id = False
+        return {}
+
     def _prepare_invoice_line_from_po_line(self, line):
 
         res = super(AccountInvoice, self)._prepare_invoice_line_from_po_line(line)
         res['discount'] = line.discount
         res['discount2'] = line.discount2
+        res['fixed_discount'] = line.fixed_discount
         return res
