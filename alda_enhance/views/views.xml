@@ -72,6 +72,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
                     <field name="discount2" groups="sale.group_discount_per_so_line"/>
+                    <field name="fixed_discount" groups="sale.group_discount_per_so_line"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
                     <field name="bonus"/>
@@ -83,6 +84,10 @@
                         <field name="discount2" class="oe_inline"/> %
                     </div>
                 </xpath>
+                <field name="amount_untaxed" position="before">
+                    <field name="total_before_fixed_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="fixed_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                </field>
             </field>
         </record>
         <!-- Invoice bonus and discounts-->

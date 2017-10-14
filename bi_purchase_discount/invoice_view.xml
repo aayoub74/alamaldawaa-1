@@ -8,10 +8,11 @@
 			<field name="arch" type="xml">
 				<field name="discount" position="after">
 					<field name="discount2"/>
+					<field name="fixed_discount"/>
 				</field>
 				<field name="amount_untaxed" position="before">
 					<field name="before_discount"/>
-					-<field name="fixed_discount"/>
+					<field name="fixed_discount"/>
 				</field>
 			</field>
 		</record>
@@ -23,10 +24,11 @@
             <field name="arch" type="xml">
                 <field name="discount" position="after">
                     <field name="discount2"/>
+                    <field name="fixed_discount"/>
                 </field>
 				<field name="amount_untaxed" position="before">
 					<field name="before_discount"/>
-					-<field name="fixed_discount"/>
+					<field name="fixed_discount"/>
 				</field>
             </field>
         </record>

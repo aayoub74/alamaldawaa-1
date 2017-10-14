@@ -12,7 +12,7 @@ _logger = getLogger(__name__)
 class PurhcaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    bonus = fields.Float(string='Bonus', digits=(16, 2))
+    bonus = fields.Float(string='Bonus', digits=dp.get_precision('Product Unit of Measure'))
     total_qty = fields.Float(
         string='Total Qty',
         digits=dp.get_precision('Product Unit of Measure'),
@@ -57,8 +57,9 @@ class PurhcaseOrderLine(models.Model):
         price_unit -= price_unit * (line.bonus / line.total_qty)
         d1 = line.discount / 100.0
         d2 = line.discount2 / 100.0
-        price_unit = price_unit * (1 - d1 - d2 + d1 * d2)
-        # price_unit -= price_unit * ((line.discount * line.discount2) / 100)
+        price_unit = price_unit * (1 - d1 - d2 + d1 * d2) #percentage discount
+        price_unit -= line.fixed_discount / line.total_qty if line.total_qty else 0 #fixed discount per line
+        price_unit -= ((line.price_subtotal/line.order_id.total_before_fixed_discount) * line.order_id.fixed_discount)/line.total_qty if line.order_id.total_before_fixed_discount and line.total_qty else 0 #total fixed discount
         return price_unit
 
     @api.multi

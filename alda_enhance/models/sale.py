@@ -9,15 +9,25 @@ from dateutil.relativedelta import relativedelta
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    @api.depends('order_line.price_total')
+    READONLY_STATES= {
+        'sale':[('readonly', True)],
+        'done':[('readonly', True)],
+        'cancel':[('readonly', True)],
+    }
+
+    fixed_discount = fields.Float('Discount', digits=dp.get_precision('Discount'), states=READONLY_STATES)
+    total_before_fixed_discount = fields.Float('Before Discount', digits=dp.get_precision('Discount'),
+                                               compute='_amount_all', track_visibility='always')
+
+    @api.depends('order_line.price_total','fixed_discount')
     def _amount_all(self):
         """
         Compute the total amounts of the SO.
         """
         for order in self:
-            amount_untaxed = amount_tax = 0.0
+            amount_untaxed = amount_tax = total_before_fixed_discount =0.0
             for line in order.order_line:
-                amount_untaxed += line.price_subtotal
+                total_before_fixed_discount += line.price_subtotal
                 # FORWARDPORT UP TO 10.0
                 if order.company_id.tax_calculation_rounding_method == 'round_globally':
                     d1 = line.discount / 100.0
@@ -30,11 +40,21 @@ class SaleOrder(models.Model):
                     amount_tax += sum(t.get('amount', 0.0) for t in taxes.get('taxes', []))
                 else:
                     amount_tax += line.price_tax
+            amount_untaxed = total_before_fixed_discount - order.fixed_discount
             order.update({
+                'total_before_fixed_discount': order.pricelist_id.currency_id.round(total_before_fixed_discount),
                 'amount_untaxed': order.pricelist_id.currency_id.round(amount_untaxed),
                 'amount_tax': order.pricelist_id.currency_id.round(amount_tax),
                 'amount_total': amount_untaxed + amount_tax,
             })
+
+    @api.multi
+    def _prepare_invoice(self):
+        self.ensure_one()
+        res = super(SaleOrder, self)._prepare_invoice()
+        res['fixed_discount'] = self.fixed_discount
+        return res
+
 
 
 class SaleOrderLine(models.Model):
@@ -46,8 +66,9 @@ class SaleOrderLine(models.Model):
         compute='_compute_total',
 
     )
-    bonus = fields.Float(string='Bonus', digits=(16, 2))
-    discount2 = fields.Float('Discount 2 (%)', digits=(16, 2))
+    bonus = fields.Float(string='Bonus', digits=dp.get_precision('Product Unit of Measure'))
+    discount2 = fields.Float('Discount 2 (%)', digits=dp.get_precision('Discount'))
+    fixed_discount = fields.Float('Discount', digits=dp.get_precision('Discount'))
 
     @api.depends('bonus', 'product_uom_qty')
     def _compute_total(self):
@@ -55,7 +76,7 @@ class SaleOrderLine(models.Model):
         for record in self:
             record.total_qty = record.bonus + record.product_uom_qty
 
-    @api.depends('product_uom_qty', 'discount', 'discount2', 'price_unit', 'tax_id')
+    @api.depends('product_uom_qty', 'discount', 'discount2', 'price_unit', 'tax_id','fixed_discount')
     def _compute_amount(self):
         """
         Compute the amounts of the SO line.
@@ -71,7 +92,7 @@ class SaleOrderLine(models.Model):
             line.update({
                 'price_tax': taxes['total_included'] - taxes['total_excluded'],
                 'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
+                'price_subtotal': taxes['total_excluded'] - line.fixed_discount,
             })
 
     @api.depends('price_unit', 'discount', 'discount2')
@@ -80,7 +101,7 @@ class SaleOrderLine(models.Model):
             d1 = line.discount / 100.0
             d2 = line.discount2 / 100.0
             discount = (line.price_unit) * (d1 + d2 - d1 * d2)
-            line.price_reduce = line.price_unit - discount
+            line.price_reduce = line.price_unit - discount - line.fixed_discount
 
     @api.multi
     def _get_tax_amount_by_group(self):
@@ -96,7 +117,7 @@ class SaleOrderLine(models.Model):
                 d1 = line.discount / 100.0
                 d2 = line.discount2 / 100.0
                 discount = (line.price_unit) * (d1 + d2 - d1 * d2)
-                price_reduce = line.price_unit - discount
+                price_reduce = line.price_unit - discount - line.fixed_discount
                 taxes = tax.compute_all(price_reduce + base_tax, quantity=line.product_uom_qty,
                                         product=line.product_id, partner=self.partner_shipping_id)['taxes']
                 for t in taxes:
@@ -141,40 +162,12 @@ class SaleOrderLine(models.Model):
 
     @api.multi
     def _prepare_invoice_line(self, qty):
-        """
-        Prepare the dict of values to create the new invoice line for a sales order line.
-
-        :param qty: float quantity to invoice
-        """
         self.ensure_one()
-        res = {}
-        account = self.product_id.property_account_income_id or self.product_id.categ_id.property_account_income_categ_id
-        if not account:
-            raise UserError(
-                _('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
-                (self.product_id.name, self.product_id.id, self.product_id.categ_id.name))
+        res  = super(SaleOrderLine, self)._prepare_invoice_line(qty)
+        res['discount2'] = self.discount2
+        res['fixed_discount'] = self.fixed_discount
+        return  res
 
-        fpos = self.order_id.fiscal_position_id or self.order_id.partner_id.property_account_position_id
-        if fpos:
-            account = fpos.map_account(account)
-
-        res = {
-            'name': self.name,
-            'sequence': self.sequence,
-            'origin': self.order_id.name,
-            'account_id': account.id,
-            'price_unit': self.price_unit,
-            'quantity': qty,
-            'discount': self.discount,
-            'discount2': self.discount2,
-            'uom_id': self.product_uom.id,
-            'product_id': self.product_id.id or False,
-            'layout_category_id': self.layout_category_id and self.layout_category_id.id or False,
-            'invoice_line_tax_ids': [(6, 0, self.tax_id.ids)],
-            'account_analytic_id': self.order_id.project_id.id,
-            'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
-        }
-        return res
 
 class ProcurementOrder(models.Model):
     _inherit = "procurement.order"

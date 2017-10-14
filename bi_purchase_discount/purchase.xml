@@ -10,10 +10,15 @@
 <!--                       <field name="discount" /> -->
                       
 <!--                 </xpath> -->
+				<field name="amount_untaxed" position="before">
+					<field name="total_before_fixed_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+					<field name="fixed_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+				</field>
 
-	<xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='product_qty']" position="after">
+				<xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='product_qty']" position="after">
                        <field name="discount" />
                        <field name="discount2" />
+                       <field name="fixed_discount" />
                 </xpath>
 
 
