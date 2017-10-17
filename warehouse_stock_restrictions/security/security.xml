@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="filter_user_stock_picking_type_allowed" model="ir.rule">
+            <field name="name">Filter Stock Picking Type Allowed</field>
+            <field name="model_id" search="[('model','=','stock.picking.type')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('id','in', [ p.id for p in user.default_picking_type_ids ])]</field>
+        </record>
+        <record id="filter_user_stock_picking_allowed" model="ir.rule">
+            <field name="name">Filter Stock Picking Allowed</field>
+            <field name="model_id" search="[('model','=','stock.picking')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('picking_type_id','in', [ p.id for p in user.default_picking_type_ids ])]</field>
+        </record>
+
+
+        <record id="filter_user_stock_quant_allowed" model="ir.rule">
+            <field name="name">Filter Stock Quant Allowed</field>
+            <field name="model_id" search="[('model','=','stock.quant')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('location_id','child_of', [ l.id for l in user.stock_location_ids ]),('location_id.usage','not in', ['internal','transit'])]</field>
+        </record>
+        <record id="filter_user_stock_move_allowed" model="ir.rule">
+            <field name="name">Filter Stock move Allowed</field>
+            <field name="model_id" search="[('model','=','stock.move')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['&amp;','|',('location_id','child_of', [ l.id for l in user.stock_location_ids ]),('location_id.usage','not in', ['internal','transit']),
+                                        '|',('location_dest_id','child_of', [ l.id for l in user.stock_location_ids ]),('location_dest_id.usage','not in', ['internal','transit'])]</field>
+        </record>
+        <record id="filter_user_stock_location_allowed" model="ir.rule">
+            <field name="name">Filter Stock location Allowed</field>
+            <field name="model_id" search="[('model','=','stock.location')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('id','child_of', [ l.id for l in user.stock_location_ids ]),('usage','not in', ['internal','transit'])]</field>
+        </record>
+
+
+        <record id="filter_user_product_categ_allowed" model="ir.rule">
+            <field name="name">Filter Product Category Allowed</field>
+            <field name="model_id" search="[('model','=','product.category')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('id','child_of', [ l.id for l in user.product_category_ids ])]</field>
+        </record>
+        <record id="filter_user_product_template_allowed" model="ir.rule">
+            <field name="name">Filter Product Template Allowed</field>
+            <field name="model_id" search="[('model','=','product.template')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('categ_id','child_of', [ l.id for l in user.product_category_ids ])]</field>
+        </record>
+        <record id="filter_user_product_product_allowed" model="ir.rule">
+            <field name="name">Filter Product Product Allowed</field>
+            <field name="model_id" search="[('model','=','product.product')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('categ_id','child_of', [ l.id for l in user.product_category_ids ])]</field>
+        </record>
+
+    </data>
+</openerp>
