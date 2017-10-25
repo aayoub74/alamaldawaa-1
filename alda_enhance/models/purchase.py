@@ -34,6 +34,12 @@ class PurhcaseOrderLine(models.Model):
 
     )
 
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        super(PurhcaseOrderLine,self).onchange_product_id()
+        if not self.price_unit and self.product_id:
+            self.price_unit = self.product_id.lst_price
+
     @api.depends('bonus', 'product_qty')
     def _compute_total(self):
         ''' Calcualte Total Qty and bouns ratio from Total Qty '''
