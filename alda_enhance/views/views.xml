@@ -103,6 +103,18 @@
             </field>
         </record>
 
+        <record id="view_customer_invoice_form_inherit_bonus" model="ir.ui.view">
+            <field name="name">view_vendor_invoice_form_inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <field name="quantity" position="after">
+                    <field name="bonus"/>
+                </field>
+            </field>
+        </record>
+
 
 
         <!-- Stock -->

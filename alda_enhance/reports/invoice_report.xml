@@ -2,16 +2,60 @@
 <odoo>
 	<data>
 		<template id="report_invoice_bouns_inherit" inherit_id="account.report_invoice_document">
+            <xpath expr="//t[@t-set='display_discount']" position="replace">
+                <t t-set="display_discount" t-value="1"/>
+            </xpath>
+            <!--<t t-set="display_discount" t-value="1"/>-->
 			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Quantity')]]" position="after">
 				<t t-if="o.type == 'out_invoice'">
 					<th class="text-right">Bonus</th>
 				</t>
 			</xpath>
-			<xpath expr="//span[@t-field='l.quantity']" position="after">
-				<t t-if="o.type == 'out_invoice'">
-					<span t-field="l.bonus"/>
+            <xpath expr="//th[@t-if='display_discount']" position="after">
+				<t t-if="display_discount">
+					<th class="text-right">Disc.2(%)</th>
+					<th class="text-right">Fixed Disc.</th>
 				</t>
 			</xpath>
+			<xpath expr="//tbody/tr/td[3]" position="after">
+				<t t-if="o.type == 'out_invoice'">
+					<td class="text-right">
+						<span t-field="l.bonus"/>
+					</td>
+				</t>
+			</xpath>
+			<xpath expr="//td[@t-if='display_discount']" position="after">
+				<t t-if="display_discount">
+					<td class="text-right">
+						<span t-field="l.discount2"/>
+					</td>
+					<td class="text-right">
+						<span t-field="l.fixed_discount"/>
+					</td>
+				</t>
+			</xpath>
+            <xpath expr="//tr[@class='border-black'][1]" position="before">
+                <tr class="border-black">
+                    <td><strong>Subtotal before Discount</strong></td>
+                    <td class="text-right">
+                        <span t-field="o.before_discount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Discount</strong></td>
+                    <td class="text-right">
+                        <span t-field="o.fixed_discount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
+                    </td>
+                </tr>
+            </xpath>
+            <xpath expr="//tr[@class='border-black'][2]" position="after">
+                <tr class="border-black">
+                    <td><strong>Tax:</strong></td>
+                    <td class="text-right">
+                    </td>
+                </tr>
+            </xpath>
+
 		</template>
 	</data>
 </odoo>
