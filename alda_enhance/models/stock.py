@@ -5,7 +5,8 @@ from odoo.addons import decimal_precision as dp
 from odoo.tools.float_utils import float_round,float_compare
 from odoo.tools.misc import DEFAULT_SERVER_DATE_FORMAT
 from odoo.addons.stock.models.stock_production_lot import ProductionLot
-import datetime
+
+from datetime import datetime,timedelta
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
@@ -98,15 +99,42 @@ class StockQuant(models.Model):
         related="lot_id.expiry_state",
         store=True)
 
+
+
 class StockPackOperationLot(models.Model):
     """ Adding Production Date"""
 
     _inherit = 'stock.pack.operation.lot'
-    
+
+
+
     life_date = fields.Date(
         string='Expiry Date',
-        default=lambda self :fields.Date.today(),
+        default=lambda self :datetime.strftime(datetime.today().date() + timedelta(days=181),DEFAULT_SERVER_DATE_FORMAT),
     )
+
+    @api.one
+    @api.constrains('life_date')
+    def check_life_date(self):
+        alert_duration = 180
+        if self.life_date:
+            life_date = datetime.strptime(self.life_date, DEFAULT_SERVER_DATE_FORMAT)
+            if life_date < datetime.today() + timedelta(days=alert_duration):
+                raise UserError("Expiration date Cannot be less than 6 months from today")
+
+
+    @api.onchange('life_date')
+    def onchange_life_date(self):
+        #alert_duration = self.operation_id.product_id.product_tml_id.alert_time
+         #6 monthes
+        alert_duration = 180
+        life_date = datetime.strptime(self.life_date, DEFAULT_SERVER_DATE_FORMAT)
+
+        if life_date < datetime.today()+ timedelta(days=alert_duration):
+            self.life_date = datetime.strftime(datetime.today().date() + timedelta(days=alert_duration+1),DEFAULT_SERVER_DATE_FORMAT)
+            return {
+                'warning': {'title': 'Error!', 'message': 'Expiration date Cannot be less than 6 months from today'},
+            }
 
 
 
@@ -133,6 +161,11 @@ class StockProductionLotInherit1(models.Model):
         if dates != sort_dates:
             raise UserError(
                 _('Dates must be: Alert Date < Removal Date < Expiry Date'))
+        alert_duration = 180
+        if self.life_date:
+            life_date = datetime.strptime(self.life_date, DEFAULT_SERVER_DATE_FORMAT)
+            if life_date < datetime.today() + timedelta(days=alert_duration):
+                raise UserError("Expiration date Cannot be less than 6 months from today")
 
    
 
@@ -151,7 +184,7 @@ class StockProductionLotInherit1(models.Model):
                 duration = getattr(product, mapped_fields[field])
                 if duration:
                     ldate = life_date or self.life_date
-                    date = datetime.datetime.strptime(ldate,DEFAULT_SERVER_DATE_FORMAT) - datetime.timedelta(days=duration)
+                    date = datetime.strptime(ldate,DEFAULT_SERVER_DATE_FORMAT) - timedelta(days=duration)
                     res[field] = fields.Date.to_string(date)
         return res
 
