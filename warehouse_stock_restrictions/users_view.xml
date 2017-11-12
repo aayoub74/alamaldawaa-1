@@ -1,6 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+
+        <record id="sale_stock.view_order_form_inherit_sale_stock" model="ir.ui.view">
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_view_invoice']" position="before">
+                    <field name="picking_ids" invisible="1"/>
+                    <button type="object" name="action_view_delivery" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('delivery_count', '=', 0)]}" groups="base.group_user">
+                        <field name="delivery_count" widget="statinfo" string="Delivery"/>
+                    </button>
+                </xpath>
+                <xpath expr="//group[@name='sales_person']" position="before">
+                    <group string="Shipping Information" name="sale_shipping">
+                        <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+                        <field name="incoterm" widget="selection" groups="base.group_user"/>
+                        <field name="picking_policy" required="True"/>
+                    </group>
+                </xpath>
+                <xpath expr="//page/field[@name='order_line']/form/group/group/field[@name='tax_id']" position="before">
+                    <field name="product_tmpl_id" invisible="1"/>
+                    <field name="product_packaging" context="{'default_product_tmpl_id': product_tmpl_id, 'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}" domain="[('product_tmpl_id','=',product_tmpl_id)]" groups="product.group_stock_packaging"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="before">
+                    <field name="route_id" groups="sale_stock.group_route_so_lines" required="True"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="before">
+                    <field name="route_id" groups="sale_stock.group_route_so_lines" required="True"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_products_tree_inherit_cost_security" model="ir.ui.view">
+            <field name="name">Product cost security tree</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="standard_price" position="attributes">
+                    <attribute name="groups">warehouse_stock_restrictions.see_product_price</attribute>
+                </field>
+            </field>
+        </record>
+        <record id="view_products_from_inherit_cost_security" model="ir.ui.view">
+            <field name="name">Product cost security</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+            <field name="arch" type="xml">
+                <field name="standard_price" position="attributes">
+                    <attribute name="groups">warehouse_stock_restrictions.see_product_price</attribute>
+                </field>
+            </field>
+        </record>
+        <record id="view_products_temp_from_inherit_cost_security" model="ir.ui.view">
+            <field name="name">Product Template cost security</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <label for="standard_price" position="attributes">
+                    <attribute name="groups">warehouse_stock_restrictions.see_product_price</attribute>
+                </label>
+                <div name="standard_price_uom" position="attributes">
+                    <attribute name="groups">warehouse_stock_restrictions.see_product_price</attribute>
+                </div>
+            </field>
+        </record>
+        <record id="view_products_from_inherit_update_qty" model="ir.ui.view">
+            <field name="name">Product update qty security</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                <button name="%(stock.action_view_change_product_quantity)d" position="attributes">
+                    <attribute name="groups">warehouse_stock_restrictions.use_update_cost</attribute>
+                </button>
+                <button name="%(stock.act_make_procurement)d" position="attributes">
+                    <attribute name="groups">warehouse_stock_restrictions.use_update_cost</attribute>
+                </button>
+            </field>
+
+        </record>
         <record id="view_users_form" model="ir.ui.view">
             <field name="name">usability.default_warehouse.res.users.form</field>
             <field name="model">res.users</field>
@@ -12,6 +87,12 @@
                     </group>
                     <group string="Products Restrictions" attrs="{'invisible': [('login','=', 'admin')]}">
                         <field name="product_category_ids" widget="many2many_tags" attrs="{'invisible': [('login','=', 'admin')]}"/>
+                    </group>
+                     <group string="Restricted Routes" attrs="{'invisible': [('login','=', 'admin')]}">
+                        <field name="stock_route_ids" widget="many2many_tags" attrs="{'invisible': [('login','=', 'admin')]}"/>
+                    </group>
+                    <group string="Restricted Journals" attrs="{'invisible': [('login','=', 'admin')]}">
+                        <field name="journal_ids" widget="many2many_tags" attrs="{'invisible': [('login','=', 'admin')]}"/>
                     </group>
                 </group>
             </field>

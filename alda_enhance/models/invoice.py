@@ -15,6 +15,7 @@ class AccountInvoice(models.Model):
 
     _inherit = 'account.invoice'
 
+
     @api.model
     def invoice_line_move_line_get(self):
         res = []

@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+        <record id="use_update_cost" model="res.groups">
+            <field name="name">Can Update Qty/Request Procurement</field>
+        </record>
+        <record id="see_product_price" model="res.groups">
+            <field name="name">See Product Price</field>
+        </record>
 
         <record id="filter_user_stock_picking_type_allowed" model="ir.rule">
             <field name="name">Filter Stock Picking Type Allowed</field>
             <field name="model_id" search="[('model','=','stock.picking.type')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('id','in', [ p.id for p in user.default_picking_type_ids ])]</field>
+            <field name="domain_force">[('id','in', [p.id for p in user.default_picking_type_ids])]</field>
         </record>
         <record id="filter_user_stock_picking_allowed" model="ir.rule">
             <field name="name">Filter Stock Picking Allowed</field>
             <field name="model_id" search="[('model','=','stock.picking')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('picking_type_id','in', [ p.id for p in user.default_picking_type_ids ])]</field>
+            <field name="domain_force">[('picking_type_id','in', [p.id for p in user.default_picking_type_ids])]</field>
         </record>
 
 
@@ -20,20 +26,20 @@
             <field name="name">Filter Stock Quant Allowed</field>
             <field name="model_id" search="[('model','=','stock.quant')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">['|',('location_id','child_of', [ l.id for l in user.stock_location_ids ]),('location_id.usage','not in', ['internal','transit'])]</field>
+            <field name="domain_force">['|',('location_id','child_of', [l.id for l in user.stock_location_ids]),('location_id.usage','not in', ['internal','transit'])]</field>
         </record>
         <record id="filter_user_stock_move_allowed" model="ir.rule">
             <field name="name">Filter Stock move Allowed</field>
             <field name="model_id" search="[('model','=','stock.move')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">['&amp;','|',('location_id','child_of', [ l.id for l in user.stock_location_ids ]),('location_id.usage','not in', ['internal','transit']),
-                                        '|',('location_dest_id','child_of', [ l.id for l in user.stock_location_ids ]),('location_dest_id.usage','not in', ['internal','transit'])]</field>
+            <field name="domain_force">['&amp;','|',('location_id','child_of', [l.id for l in user.stock_location_ids]),('location_id.usage','not in', ['internal','transit']),
+                                        '|',('location_dest_id','child_of', [l.id for l in user.stock_location_ids]),('location_dest_id.usage','not in', ['internal','transit'])]</field>
         </record>
         <record id="filter_user_stock_location_allowed" model="ir.rule">
             <field name="name">Filter Stock location Allowed</field>
             <field name="model_id" search="[('model','=','stock.location')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">['|',('id','child_of', [ l.id for l in user.stock_location_ids ]),('usage','not in', ['internal','transit'])]</field>
+            <field name="domain_force">['|',('id','child_of', [l.id for l in user.stock_location_ids]),('usage','not in', ['internal','transit'])]</field>
         </record>
 
 
@@ -41,19 +47,60 @@
             <field name="name">Filter Product Category Allowed</field>
             <field name="model_id" search="[('model','=','product.category')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('id','child_of', [ l.id for l in user.product_category_ids ])]</field>
+            <field name="domain_force">[('id','child_of', [l.id for l in user.product_category_ids])]</field>
         </record>
         <record id="filter_user_product_template_allowed" model="ir.rule">
             <field name="name">Filter Product Template Allowed</field>
             <field name="model_id" search="[('model','=','product.template')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('categ_id','child_of', [ l.id for l in user.product_category_ids ])]</field>
+            <field name="domain_force">[('categ_id','child_of', [l.id for l in user.product_category_ids])]</field>
         </record>
         <record id="filter_user_product_product_allowed" model="ir.rule">
             <field name="name">Filter Product Product Allowed</field>
             <field name="model_id" search="[('model','=','product.product')]" model="ir.model"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('categ_id','child_of', [ l.id for l in user.product_category_ids ])]</field>
+            <field name="domain_force">[('categ_id','child_of', [l.id for l in user.product_category_ids])]</field>
+        </record>
+        <record id="filter_user_stock_route_allowed" model="ir.rule">
+            <field name="name">Filter Stock Route Allowed</field>
+            <field name="model_id" search="[('model','=','stock.location.route')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('id','in', [l.id for l in user.stock_route_ids]),('users_ids','=',False)]</field>
+        </record>
+
+        <record id="filter_user_journal_allowed" model="ir.rule">
+            <field name="name">Filter Journal Allowed</field>
+            <field name="model_id" search="[('model','=','account.journal')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('id','in', [l.id for l in user.journal_ids]),('users_ids','=',False)]</field>
+        </record>
+
+        <record id="filter_user_invoice_allowed" model="ir.rule">
+            <field name="name">Filter invoice Allowed</field>
+            <field name="model_id" search="[('model','=','account.invoice')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('journal_id','in', [l.id for l in user.journal_ids]),('journal_id.users_ids','=',False)]</field>
+        </record>
+
+        <record id="filter_user_move_allowed" model="ir.rule">
+            <field name="name">Filter Journal Entry Allowed</field>
+            <field name="model_id" search="[('model','=','account.move')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('journal_id','in', [l.id for l in user.journal_ids]),('journal_id.users_ids','=',False)]</field>
+        </record>
+
+        <!--<record id="filter_user_move_line_allowed" model="ir.rule">-->
+            <!--<field name="name">Filter Journal Item Allowed</field>-->
+            <!--<field name="model_id" search="[('model','=','account.move.line')]" model="ir.model"/>-->
+            <!--<field name="groups" eval="[(4, ref('base.group_user'))]"/>-->
+            <!--<field name="domain_force">['|',('journal_id','in', [l.id for l in user.journal_ids]),('journal_id.users_ids','=',False)]</field>-->
+        <!--</record>-->
+
+        <record id="filter_user_payment_allowed" model="ir.rule">
+            <field name="name">Filter payment journal Allowed</field>
+            <field name="model_id" search="[('model','=','account.payment')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('journal_id','in', [l.id for l in user.journal_ids]),('journal_id.users_ids','=',False)]</field>
         </record>
 
     </data>

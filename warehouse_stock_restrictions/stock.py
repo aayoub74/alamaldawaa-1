@@ -23,7 +23,23 @@ class ResUsers(models.Model):
         'product.category', 'product_category_users_rel',
         'user_id', 'product_category_id', string='Allowed Product Category')
 
+    stock_route_ids = fields.Many2many(
+        'stock.location.route', 'stock_location_route_users_rel',
+        'user_id', 'stock_route_id', string='Restricted Routes')
 
+    journal_ids = fields.Many2many(
+        'account.journal', 'account_journal_users_rel',
+        'user_id', 'journal_id', string='Restricted Journals')
+
+class AccountJournal(models.Model):
+    _inherit = 'account.journal'
+    users_ids = fields.Many2many('res.users','account_journal_users_rel','journal_id','user_id',
+                                 string='Allowed Users')
+
+class StockLocationRoute(models.Model):
+    _inherit = 'stock.location.route'
+    users_ids = fields.Many2many('res.users','stock_location_route_users_rel','stock_route_id','user_id',
+                                 string='Allowed Users')
 class stock_move(models.Model):
     _inherit = 'stock.move'
 
@@ -38,9 +54,9 @@ class stock_move(models.Model):
                 'Invalid Location. You cannot process this move since you do '
                 'not control the location "%s". '
                 'Please contact your Adminstrator.')
-            if self.location_id not in user_locations:
+            if self.location_id not in user_locations and self.location_id.usage == 'internal':
                 raise Warning(message % self.location_id.name)
-            elif self.location_dest_id not in user_locations:
+            elif self.location_dest_id not in user_locations and self.location_dest_id.usage == 'internal':
                 raise Warning(message % self.location_dest_id.name)
 
 
