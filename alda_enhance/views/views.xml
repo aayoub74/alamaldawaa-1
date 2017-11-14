@@ -70,6 +70,10 @@
             <field name="type">form</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
+                <field name="fiscal_position_id" position="after">
+                    <field name="type_invoice_policy"/>
+                    <field name="is_paid"/>
+                </field>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
                     <field name="discount2" groups="sale.group_discount_per_so_line"/>
                     <field name="fixed_discount" groups="sale.group_discount_per_so_line"/>
@@ -90,6 +94,20 @@
                 </field>
             </field>
         </record>
+        <record id="view_sale_order_form_inherit_hide_delivery" model="ir.ui.view">
+            <field name="name">view_sale_order_form_inherit_hide_delivery</field>
+            <field name="model">sale.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
+            <field name="arch" type="xml">
+                <button name="action_view_delivery" position="attributes">
+                    <attribute name="attrs">
+                        {'invisible': ['|',('delivery_count', '=', 0),'&amp;',('type_invoice_policy','=','prepaid'),('is_paid','=',False)]}
+                    </attribute>
+                </button>
+            </field>
+        </record>
+
         <!-- Invoice bonus and discounts-->
         <record id="view_vendor_invoice_form_inherit" model="ir.ui.view">
             <field name="name">view_vendor_invoice_form_inherit</field>
@@ -146,25 +164,17 @@
                 </xpath>
             </field>
         </record>
-        <!-- <record id="product_expiry.view_move_form_expiry" model="ir.ui.view">
-            <field name="name">stock.production.lot.form</field>
-            <field name="model">stock.production.lot</field>
-            <field name="inherit_id" ref="stock.view_production_lot_form"/>
+         <record id="stock_warehouse_form_view_inherit" model="ir.ui.view">
+            <field name="name">Add Invoice Policy to warehouse</field>
+            <field name="model">stock.warehouse</field>
+            <field name="inherit_id" ref="stock.view_warehouse"/>
             <field name="arch" type="xml">
-                <xpath expr="//group[@name='main_group']" position="after">
-                    <group string="Dates">
-                        <group>
-                            <field name="alert_date"/>
-                            <field name="removal_date"/>
-                        </group>
-                        <group>
-                            <field name="use_date"/>
-                            <field name="life_date"/>
-                        </group>
-                    </group>
-                </xpath>
+                <field name="resupply_wh_ids" position="after">
+                    <field name="type_invoice_policy"/>
+                </field>
             </field>
-        </record> -->
+         </record>
+
         <!-- Expiry States-->
         <record id="product_expiry_state_tree_view" model="ir.ui.view">
             <field name="name">product.expiry.state.tree.view</field>

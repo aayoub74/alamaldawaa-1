@@ -300,19 +300,11 @@ class StockPackOperation(models.Model):
                     })
         return res
 
+class StockWarehouse(models.Model):
+    _inherit = 'stock.warehouse'
 
-
-           
-    # @api.depends('b_ratio','product_qty','qty_done')
-    # def _get_qty_bouns(self):
-    #     for pack in self:
-    #         if pack.qty_done:
-    #             pack.bouns = float_round(value=pack.qty_done*pack.b_ratio,
-    #                 precision_digits=0)
-    #             pack.orig_qty = pack.qty_done - pack.bouns
-    #         else:
-    #             pack.bouns = float_round(value=pack.product_qty*pack.b_ratio,
-    #                 precision_digits=0)
-    #             pack.orig_qty = pack.product_qty - pack.bouns
-
-                
+    type_invoice_policy = fields.Selection(
+        selection=[('normal', 'By Product'),
+                   ('prepaid', 'Before Delivery')],
+        default='prepaid',
+    )

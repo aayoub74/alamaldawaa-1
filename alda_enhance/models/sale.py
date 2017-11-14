@@ -18,6 +18,25 @@ class SaleOrder(models.Model):
     fixed_discount = fields.Float('Discount', digits=dp.get_precision('Discount'), states=READONLY_STATES)
     total_before_fixed_discount = fields.Float('Before Discount', digits=dp.get_precision('Discount'),
                                                compute='_amount_all', track_visibility='always')
+    type_invoice_policy = fields.Selection(
+        selection=[('normal', 'By Product'),
+                   ('prepaid', 'Before Delivery')],
+        related='warehouse_id.type_invoice_policy',readonly=True
+    )
+
+    is_paid = fields.Boolean(string="Is paid?",compute='_check_payment')
+
+    @api.depends('order_line.invoice_lines.invoice_id.state','order_line.product_uom_qty','order_line.qty_invoiced')
+    def _check_payment(self):
+        for rec in self:
+            precision = self.env['decimal.precision'].precision_get(
+                'Product Unit of Measure')
+            invoice_status = rec.mapped('order_line.invoice_lines.invoice_id.state')
+            rec.is_paid = False if (set(invoice_status) - set(['paid'])) or any(
+                float_compare(
+                    line.product_uom_qty, line.qty_invoiced,
+                    precision_digits=precision) > 0
+            for line in rec.order_line) else True
 
     @api.depends('order_line.price_total','fixed_discount')
     def _amount_all(self):
