@@ -94,6 +94,9 @@
                     <group string="Restricted Journals" attrs="{'invisible': [('login','=', 'admin')]}">
                         <field name="journal_ids" widget="many2many_tags" attrs="{'invisible': [('login','=', 'admin')]}"/>
                     </group>
+                    <group string="Restricted Partners" attrs="{'invisible': [('login','=', 'admin')]}">
+                        <field name="partner_ids" widget="many2many_tags" attrs="{'invisible': [('login','=', 'admin')]}"/>
+                    </group>
                 </group>
             </field>
         </record>

@@ -103,5 +103,12 @@
             <field name="domain_force">['|',('journal_id','in', [l.id for l in user.journal_ids]),('journal_id.users_ids','=',False)]</field>
         </record>
 
+        <record id="filter_user_partner_allowed" model="ir.rule">
+            <field name="name">Filter partner Allowed</field>
+            <field name="model_id" search="[('model','=','res.partner')]" model="ir.model"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',('id','in', [l.id for l in user.partner_ids]),('users_ids','=',False)]</field>
+        </record>
+
     </data>
 </openerp>

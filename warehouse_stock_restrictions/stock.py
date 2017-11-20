@@ -31,6 +31,16 @@ class ResUsers(models.Model):
         'account.journal', 'account_journal_users_rel',
         'user_id', 'journal_id', string='Restricted Journals')
 
+    partner_ids = fields.Many2many(
+        'res.partner', 'res_partner_users_rel',
+        'user_id', 'partner_id', string='Restricted Partners'
+    )
+
+class resPartner(models.Model):
+    _inherit = 'res.partner'
+    users_ids = fields.Many2many('res.users','res_partner_users_rel','partner_id','user_id',
+                                 string='Allowed Users')
+
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
     users_ids = fields.Many2many('res.users','account_journal_users_rel','journal_id','user_id',
