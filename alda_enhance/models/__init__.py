@@ -6,3 +6,4 @@ from . import invoice
 from . import stock
 from . import sale
 from . import hr
+from . import payment
