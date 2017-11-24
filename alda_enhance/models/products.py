@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api,exceptions
 from odoo.tools.translate import _
+import odoo.addons.decimal_precision as dp
 
 class ProductProductInherit(models.Model):
     _inherit = 'product.product'
@@ -100,6 +101,14 @@ class ProductInher(models.Model):
     marketing_company = fields.Char(
         string='Marketing Company',
     )
+
+    sale_discount = fields.Float(string='Sale Discount(%)',digits=dp.get_precision('Discount'))
+
+    @api.one
+    @api.constrains('sale_discount')
+    def _check_discount(self):
+        if self.sale_discount > 100 or self.sale_discount < 0:
+            raise exceptions.ValidationError(_("Sale Discount Must be between 0.00 and 100.00"))
 
     @api.one
     @api.constrains('life_time', 'use_time', 'alert_time', 'removal_time')

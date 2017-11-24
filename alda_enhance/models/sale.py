@@ -89,6 +89,12 @@ class SaleOrderLine(models.Model):
     discount2 = fields.Float('Discount 2 (%)', digits=dp.get_precision('Discount'))
     fixed_discount = fields.Float('Discount', digits=dp.get_precision('Discount'))
 
+
+    # @api.onchange('product_id')
+    # def get_discount(self):
+    #     self.discount2 = self.product_id.sale_discount
+
+
     @api.depends('bonus', 'product_uom_qty')
     def _compute_total(self):
         ''' Calcualte Total Qty and bouns ratio from Total Qty '''

@@ -7,6 +7,11 @@
             <field name="type">form</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
+                <page name="sales" position="inside">
+                    <group string="Sale Discount" col="2">
+                        <field name="sale_discount"/>
+                    </group>
+                </page>
                 <page name="general_information" position="after">
                     <page name="extra_information" string="Extra Information">
                         <group col="4">
@@ -37,6 +42,12 @@
                             <field name="default_code"/>
                             ]</span>
                     </strong>
+                </xpath>
+                <field name="image_small" position="after">
+                    <field name="sale_discount"/>
+                </field>
+                <xpath expr="//ul/li" position="after">
+                    <li>Discount(%): <field name="sale_discount"/></li>
                 </xpath>
             </field>
         </record>
