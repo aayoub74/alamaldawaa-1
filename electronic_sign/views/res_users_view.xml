@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+       <record id="view_users_form_simple_modif_ext" model="ir.ui.view">
+            <field name="name">res.users.preferences.form signature</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[2]" position='after'>
+                    <group string="La signature de l'utilisateur">
+                        <field name="signature_img" widget="image"  class="oe_avatar oe_left"/>
+                    </group>
+                </xpath>
+            </field>
+       </record>
+
+       <record id="view_users_form_ext" model="ir.ui.view">
+            <field name="name">res.users.form signature</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <!-- <xpath expr="//group[@string='Messaging and Social']" position='after'> -->
+                <xpath expr="//group[2]" position='after'>
+                    <group string="Signature img">
+                        <field name="signature_img" widget="image"  class="oe_avatar oe_left"/>
+                    </group>
+                </xpath>
+            </field>
+       </record>
+
+        <template id="report_external_layout_header_update" inherit_id="report.external_layout_header">
+            <xpath expr="//div[@class='header']/div[3]/div[1]" position="replace">
+                <div class="col-xs-3" name="company_address">
+                </div>
+            </xpath>
+        </template>
+
+
+    </data>
+</odoo>
+
