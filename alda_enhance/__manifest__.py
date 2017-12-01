@@ -25,6 +25,7 @@
         'base_action_rule',
         'product_expiry',
         'hr_contract',
+        'sale',
         ],
 
     # always loaded
