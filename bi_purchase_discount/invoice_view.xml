@@ -7,9 +7,20 @@
 			<field name="inherit_id" ref="account.invoice_supplier_form"/>
 			<field name="arch" type="xml">
 				<field name="discount" position="after">
-					<field name="discount2"/>
-					<field name="fixed_discount"/>
+					<field name="discount2" attrs="{'readonly':[('purchase_id','!=',False)]}"/>
+					<field name="fixed_discount" attrs="{'readonly':[('purchase_id','!=',False)]}"/>
 				</field>
+            <field name="discount" position="attributes">
+                <attribute name="attrs">
+                    {'readonly':[('purchase_id','!=',False)]}
+                </attribute>
+            </field>
+            <field name="price_unit" position="attributes">
+                <attribute name="attrs">
+                    {'readonly':[('purchase_id','!=',False)]}
+                </attribute>
+            </field>
+
 				<field name="amount_untaxed" position="before">
 					<field name="before_discount"/>
 					<field name="fixed_discount"/>
