@@ -31,6 +31,7 @@
     'data': [
         'security/res_groups.xml',
         'wizard/lot_return_view.xml',
+        'wizard/create_sale_order_view.xml',
         'views/views.xml',
         'data/email_templates.xml',
         'data/automated_actions.xml',

@@ -102,12 +102,14 @@ class ProductInher(models.Model):
         string='Marketing Company',
     )
 
-    sale_discount = fields.Float(string='Sale Discount(%)',digits=dp.get_precision('Discount'))
+    sale_discount = fields.Float(string='Sale Discount1(%)',digits=dp.get_precision('Discount'))
+    sale_discount2 = fields.Float(string='Sale Discount2(%)',digits=dp.get_precision('Discount'))
 
     @api.one
-    @api.constrains('sale_discount')
+    @api.constrains('sale_discount','sale_discount2')
     def _check_discount(self):
-        if self.sale_discount > 100 or self.sale_discount < 0:
+        if self.sale_discount > 100 or self.sale_discount < 0 or \
+                        self.sale_discount2 > 100 or self.sale_discount2 < 0:
             raise exceptions.ValidationError(_("Sale Discount Must be between 0.00 and 100.00"))
 
     @api.one

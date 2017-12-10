@@ -1,6 +1,19 @@
 <odoo>
     <data>
         <!-- Product -->
+
+         <record id="view_product_temp_tree_inherit" model="ir.ui.view">
+            <field name="name">Product tree View Extra Info</field>
+            <field name="model">product.template</field>
+            <field name="type">tree</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                 <field name="type" position="after">
+                     <field name="sale_discount"/>
+                     <field name="sale_discount2"/>
+                 </field>
+            </field>
+         </record>
         <record id="view_product_temp_form_inherit" model="ir.ui.view">
             <field name="name">Product Form View Extra Info</field>
             <field name="model">product.template</field>
@@ -10,6 +23,7 @@
                 <page name="sales" position="inside">
                     <group string="Sale Discount" col="2">
                         <field name="sale_discount"/>
+                        <field name="sale_discount2"/>
                     </group>
                 </page>
                 <page name="general_information" position="after">
@@ -45,9 +59,11 @@
                 </xpath>
                 <field name="image_small" position="after">
                     <field name="sale_discount"/>
+                    <field name="sale_discount2"/>
                 </field>
                 <xpath expr="//ul/li" position="after">
                     <li>Discount(%): <field name="sale_discount"/></li>
+`                    <li>Discount2(%): <field name="sale_discount2"/></li>
                 </xpath>
             </field>
         </record>
