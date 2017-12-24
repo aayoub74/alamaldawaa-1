@@ -4,7 +4,7 @@
 #    __openerp__.py file at the root folder of this module.                   #
 ###############################################################################
 
-from odoo import models, fields, api
+from odoo import models, fields, api,exceptions
 from odoo.tools.translate import _
 from odoo.addons import decimal_precision as dp
 from logging import getLogger
@@ -65,5 +65,16 @@ class InvoiceLine(models.Model):
         default=0.0,
         digits=dp.get_precision('Product Unit of Measure'),
     )
+
+    @api.one
+    @api.constrains ('product_id', 'purchase_id')
+    def prevent_vendor_bill(self):
+        if self.product_id.type == 'product' and not self.purchase_id:
+            raise exceptions.ValidationError(_("Product Must have Purchase order"))
+
+
+
+
+
 
 
