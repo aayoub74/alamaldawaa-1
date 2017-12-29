@@ -2,6 +2,9 @@
 <odoo>
 	<data>
 		<template id="report_invoice_bouns_inherit" inherit_id="account.report_invoice_document">
+			<xpath expr="//span[@t-if='o.partner_id.vat']" position="after">
+                <span t-if="o.partner_id.taxid">Tax ID: <span t-field="o.partner_id.taxid"/></span>
+            </xpath>
             <xpath expr="//t[@t-set='display_discount']" position="replace">
                 <t t-set="display_discount" t-value="1"/>
             </xpath>
@@ -95,9 +98,9 @@
 				</tr>
 			</xpath>
 
-			<xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
+			<!--xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
 				<th>VAT</th>
-			</xpath>
+			</xpath-->
 
 		</template>
 	</data>

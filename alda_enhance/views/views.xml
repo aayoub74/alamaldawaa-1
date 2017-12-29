@@ -319,5 +319,15 @@
                 </group>
             </field>
         </record>
+        <record id="res_partner_form_inherit_tax" model="ir.ui.view">
+            <field name="name">Add Tax ID to partner Form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <field name="email" position="after">
+                    <field name="taxid"/>
+                </field>
+            </field>
+        </record>
     </data>
 </odoo>
