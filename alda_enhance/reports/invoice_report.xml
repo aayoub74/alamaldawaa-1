@@ -95,9 +95,9 @@
 				</tr>
 			</xpath>
 
-			<xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
+			<!--xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
 				<th>VAT</th>
-			</xpath>
+			</xpath-->
 
 		</template>
 	</data>
