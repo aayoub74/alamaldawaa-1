@@ -11,18 +11,36 @@
 					<th class="text-right">Bonus</th>
 				</t>
 			</xpath>
+			<xpath expr="//th[@t-if='display_discount']" position="replace">
+				<th t-if="display_discount" class="text-right">Disc.% I</th>
+			</xpath>
             <xpath expr="//th[@t-if='display_discount']" position="after">
 				<t t-if="display_discount">
-					<th class="text-right">Disc.2(%)</th>
-					<th class="text-right">Fixed Disc.</th>
+					<th class="text-right">Disc.% II</th>
+					<th class="text-right">Disc. $</th>
 				</t>
+				<th class="text-right">Subtotal</th>
 			</xpath>
+
+			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Taxes')]]" position="replace">
+				<th class="text-right">VAT</th>
+			</xpath>
+
+			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Tax Excluded Price')]]" position="replace">
+				<th class="text-right">Sub. After VAT</th>
+			</xpath>
+
 			<xpath expr="//tbody/tr/td[3]" position="after">
 				<t t-if="o.type == 'out_invoice'">
 					<td class="text-right">
 						<span t-field="l.bonus"/>
 					</td>
 				</t>
+			</xpath>
+			<xpath expr="//span[@t-field='l.price_subtotal']" position="replace">
+				<t t-set="total_included" t-value="l.compute_totals()[0]['total_included']"/>
+				<span t-esc="total_included" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+
 			</xpath>
 			<xpath expr="//td[@t-if='display_discount']" position="after">
 				<t t-if="display_discount">
@@ -33,7 +51,11 @@
 						<span t-field="l.fixed_discount"/>
 					</td>
 				</t>
+				<td class="text-right">
+					<span t-field="l.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+				</td>
 			</xpath>
+
             <xpath expr="//tr[@class='border-black'][1]" position="before">
                 <tr class="border-black">
                     <td><strong>Subtotal before Discount</strong></td>
@@ -50,11 +72,23 @@
             </xpath>
             <xpath expr="//tr[@class='border-black'][2]" position="after">
                 <tr class="border-black">
-                    <td><strong>Tax:</strong></td>
+                    <td><strong>VAT</strong></td>
                     <td class="text-right">
                     </td>
                 </tr>
             </xpath>
+			<xpath expr="//tr[@class='border-black'][1]" position="replace">
+				<tr class="border-black">
+					<td><strong>Subtotal Before VAT</strong></td>
+					<td class="text-right">
+						<span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+					</td>
+				</tr>
+			</xpath>
+
+			<xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
+				<th>VAT</th>
+			</xpath>
 
 		</template>
 	</data>
