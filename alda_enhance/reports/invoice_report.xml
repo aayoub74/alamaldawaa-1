@@ -24,6 +24,7 @@
 
 			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Taxes')]]" position="replace">
 				<th class="text-right">VAT</th>
+				<th class="text-right">VAT. $</th>
 			</xpath>
 
 			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Tax Excluded Price')]]" position="replace">
@@ -56,6 +57,14 @@
 				</td>
 			</xpath>
 
+			<xpath expr="//tbody/tr/td[7]" position="after">
+
+					<td class="text-right">
+						<t t-set="total_tax" t-value="l.compute_totals()[0]['total_tax']"/>
+						<span t-esc="total_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+					</td>
+			</xpath>
+
             <xpath expr="//tr[@class='border-black'][1]" position="before">
                 <tr class="border-black">
                     <td><strong>Subtotal before Discount</strong></td>
@@ -86,9 +95,9 @@
 				</tr>
 			</xpath>
 
-			<!--xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
+			<xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']/div/table/thead/tr/th[text()[contains(.,'Tax')]]" position="replace">
 				<th>VAT</th>
-			</xpath-->
+			</xpath>
 
 		</template>
 	</data>

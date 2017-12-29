@@ -75,7 +75,7 @@ class InvoiceLine(models.Model):
         total = {
             'total_excluded':self.quantity * price,
             'total_included':self.quantity * price,
-            'total_tax':0,
+            'total_tax':0.0,
         }
         if self.invoice_line_tax_ids:
             total = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
