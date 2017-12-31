@@ -89,7 +89,7 @@
                     </td>
                 </tr>
             </xpath>
-			<xpath expr="//tr[@class='border-black'][1]" position="replace">
+			<xpath expr="//tr[@class='border-black'][2]" position="replace">
 				<tr class="border-black">
 					<td><strong>Subtotal Before VAT</strong></td>
 					<td class="text-right">
