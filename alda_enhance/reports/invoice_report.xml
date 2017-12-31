@@ -9,7 +9,7 @@
                 <t t-set="display_discount" t-value="1"/>
             </xpath>
             <!--<t t-set="display_discount" t-value="1"/>-->
-			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Quantity')]]" position="after">
+			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[3]" position="after">
 				<t t-if="o.type == 'out_invoice'">
 					<th class="text-right">Bonus</th>
 				</t>
@@ -20,17 +20,17 @@
             <xpath expr="//th[@t-if='display_discount']" position="after">
 				<t t-if="display_discount">
 					<th class="text-right">Disc.% II</th>
-					<th class="text-right">Disc. $</th>
+					<th class="text-right">Disc. SR</th>
 				</t>
 				<th class="text-right">Subtotal</th>
 			</xpath>
 
-			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Taxes')]]" position="replace">
+			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[7]" position="replace">
 				<th class="text-right">VAT</th>
-				<th class="text-right">VAT. $</th>
+				<th class="text-right">VAT. SR</th>
 			</xpath>
 
-			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[text()[contains(.,'Tax Excluded Price')]]" position="replace">
+			<xpath expr="//table[@class='table table-condensed']/thead/tr/th[9]" position="replace">
 				<th class="text-right">Sub. After VAT</th>
 			</xpath>
 
