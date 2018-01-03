@@ -15,6 +15,10 @@ class AccountInvoice(models.Model):
 
     _inherit = 'account.invoice'
 
+    @api.multi
+    def invoice_print_receipt(self):
+        self.ensure_one()
+        return self.env['report'].get_action(self, 'alda_enhance.report_invoice_receipt')
 
     @api.model
     def invoice_line_move_line_get(self):

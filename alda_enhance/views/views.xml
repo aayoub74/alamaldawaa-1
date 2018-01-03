@@ -145,6 +145,12 @@
                 <field name="quantity" position="after">
                     <field name="bonus"/>
                 </field>
+                <!--button name="invoice_print" position="after">
+                    <field name="id" invisible="1"/>
+                    <button name="invoice_print_receipt" string="Print Receipt" type="object"
+                        attrs="{'invisible':[('id','!=',False)]}"
+                        class="oe_highlight" groups="base.group_user"/>
+                </button-->
             </field>
         </record>
 
@@ -157,6 +163,13 @@
                 <field name="quantity" position="after">
                     <field name="bonus"/>
                 </field>
+
+                <button name="invoice_print" position="after">
+                    <field name="id" invisible="1"/>
+                    <button name="invoice_print_receipt" string="Print Receipt" type="object"
+                        states="draft,proforma,proforma2,open,paid"
+                        class="oe_highlight" groups="base.group_user"/>
+                </button>
             </field>
         </record>
 

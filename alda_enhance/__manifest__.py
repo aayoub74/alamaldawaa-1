@@ -37,6 +37,7 @@
         'data/email_templates.xml',
         'data/automated_actions.xml',
         'reports/invoice_report.xml',
+        'reports/invoice_receipt.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
