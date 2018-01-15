@@ -2,18 +2,18 @@
     <data>
         <!-- Product -->
 
-         <record id="view_product_temp_tree_inherit" model="ir.ui.view">
+        <record id="view_product_temp_tree_inherit" model="ir.ui.view">
             <field name="name">Product tree View Extra Info</field>
             <field name="model">product.template</field>
             <field name="type">tree</field>
             <field name="inherit_id" ref="product.product_template_tree_view"/>
             <field name="arch" type="xml">
-                 <field name="type" position="after">
-                     <field name="sale_discount"/>
-                     <field name="sale_discount2"/>
-                 </field>
+                <field name="type" position="after">
+                    <field name="sale_discount"/>
+                    <field name="sale_discount2"/>
+                </field>
             </field>
-         </record>
+        </record>
         <record id="view_product_temp_form_inherit" model="ir.ui.view">
             <field name="name">Product Form View Extra Info</field>
             <field name="model">product.template</field>
@@ -54,7 +54,8 @@
                         <field name="name"/>
                         <span t-if="record.default_code.value">[
                             <field name="default_code"/>
-                            ]</span>
+                            ]
+                        </span>
                     </strong>
                 </xpath>
                 <field name="image_small" position="after">
@@ -62,8 +63,13 @@
                     <field name="sale_discount2"/>
                 </field>
                 <xpath expr="//ul/li" position="after">
-                    <li>Discount(%): <field name="sale_discount"/></li>
-`                    <li>Discount2(%): <field name="sale_discount2"/></li>
+                    <li>Discount(%):
+                        <field name="sale_discount"/>
+                    </li>
+                    `
+                    <li>Discount2(%):
+                        <field name="sale_discount2"/>
+                    </li>
                 </xpath>
             </field>
         </record>
@@ -109,14 +115,16 @@
                     <field name="bonus"/>
                 </xpath>
 
-               <xpath expr="//div[@name='discount']" position="after">
+                <xpath expr="//div[@name='discount']" position="after">
                     <label for="discount2" groups="sale.group_discount_per_so_line"/>
                     <div name="discount2" groups="sale.group_discount_per_so_line">
-                        <field name="discount2" class="oe_inline"/> %
+                        <field name="discount2" class="oe_inline"/>
+                        %
                     </div>
                 </xpath>
                 <field name="amount_untaxed" position="before">
-                    <field name="total_before_fixed_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="total_before_fixed_discount" widget="monetary"
+                           options="{'currency_field': 'currency_id'}"/>
                     <field name="fixed_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 </field>
             </field>
@@ -161,7 +169,6 @@
         </record>
 
 
-
         <!-- Stock -->
 
         <!-- Life Date in Pack Operation-->
@@ -172,13 +179,14 @@
             <field name="inherit_id" ref="stock.view_pack_operation_lot_form"/>
             <field name="arch" type="xml">
                 <field name="lot_name" position="after">
-                    <field invisible="not context.get('only_create', False)" name="life_date" required="context.get('only_create', False)"/>
+                    <field invisible="not context.get('only_create', False)" name="life_date"
+                           required="context.get('only_create', False)"/>
                 </field>
             </field>
         </record>
         <!-- Production Date in Lots-->
         <delete search="view_lot_form_production_inherit" model="ir.ui.view"/>
-        
+
         <!-- Life Date in Quant-->
         <record id="view_quant_form_production_inherit" model="ir.ui.view">
             <field name="name">view_quant_form_production_inherit</field>
@@ -191,7 +199,7 @@
                 </xpath>
             </field>
         </record>
-         <record id="stock_warehouse_form_view_inherit" model="ir.ui.view">
+        <record id="stock_warehouse_form_view_inherit" model="ir.ui.view">
             <field name="name">Add Invoice Policy to warehouse</field>
             <field name="model">stock.warehouse</field>
             <field name="inherit_id" ref="stock.view_warehouse"/>
@@ -200,7 +208,7 @@
                     <field name="type_invoice_policy"/>
                 </field>
             </field>
-         </record>
+        </record>
 
         <!-- Expiry States-->
         <record id="product_expiry_state_tree_view" model="ir.ui.view">
@@ -230,12 +238,21 @@
             <field name="arch" type="xml">
                 <field name="product_id" position="after">
                     <field name="expiry_state"/>
-                    <filter context="{}" domain="[('alert_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('alert_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]" help="" name="in_alert_this_month" string="In Alert This Month"/>
-                    <filter context="{}" domain="[('removal_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('removal_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]" help="" name="to_remove_this_month" string="To Remove This Month"/>
-                    <filter context="{}" domain="[('life_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('life_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]" help="" name="expiry_this_month" string="Expires This Month"/>
-                    <filter domain="[                                 '&amp;',                                 ('alert_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('alert_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]" name="in_alert_this_week" string="In Alert This Week"/>
-                    <filter domain="[                                 '&amp;',                                 ('removal_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('removal_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]" name="to_remove_this_week" string="To Remove This Week"/>
-                    <filter domain="[                                 '&amp;',                                 ('life_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('life_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]" name="expiry_this_week" string="Expires This Week"/>
+                    <filter context="{}"
+                            domain="[('alert_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('alert_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]"
+                            help="" name="in_alert_this_month" string="In Alert This Month"/>
+                    <filter context="{}"
+                            domain="[('removal_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('removal_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]"
+                            help="" name="to_remove_this_month" string="To Remove This Month"/>
+                    <filter context="{}"
+                            domain="[('life_date','&gt;=', context_today().strftime('%Y-%m-1')),                         ('life_date','&lt;', ((context_today() + relativedelta(months=1)).strftime('%Y-%m-1')) )]"
+                            help="" name="expiry_this_month" string="Expires This Month"/>
+                    <filter domain="[                                 '&amp;',                                 ('alert_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('alert_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]"
+                            name="in_alert_this_week" string="In Alert This Week"/>
+                    <filter domain="[                                 '&amp;',                                 ('removal_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('removal_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]"
+                            name="to_remove_this_week" string="To Remove This Week"/>
+                    <filter domain="[                                 '&amp;',                                 ('life_date', '&gt;=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),                                 ('life_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')),                             ]"
+                            name="expiry_this_week" string="Expires This Week"/>
                 </field>
             </field>
         </record>
@@ -247,7 +264,11 @@
             <field name="arch" type="xml">
                 <sheet position='before'>
                     <header>
-                        <button name="%(alda_enhance.act_stock_return_quant)d" type='action' string="Return" class="oe_highlight"/>
+                        <field name="expiry_state" widget="statusbar"/>
+                        <button name="%(alda_enhance.act_stock_return_quant)d" type='action' string="Return"
+                                class="oe_highlight"/>
+                        <button name="%(alda_enhance.act_scrap_wizard)d" type='action' string="Scrap"
+                                class="oe_highlight" attrs="{'invisible': [('expiry_state', '!=', 'expired')]}"/>
                     </header>
                 </sheet>
             </field>
