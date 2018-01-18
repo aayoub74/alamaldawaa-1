@@ -63,8 +63,12 @@ class NewHrPayslip(models.Model):
                     continue
                 debit_account_id = line.salary_rule_id.account_debit.id
                 credit_account_id = line.salary_rule_id.account_credit.id
+
                 if line.salary_rule_id.account_analytic_true:
                     centrocosto = slip.contract_id.analytic_account_id and slip.contract_id.analytic_account_id.id or False
+                else:
+                    centrocosto = line.salary_rule_id.analytic_account_id and line.salary_rule_id.analytic_account_id.id or False
+
                 if debit_account_id:
                     debit_line = (0, 0, {
                         'name': line.name,
@@ -89,7 +93,7 @@ class NewHrPayslip(models.Model):
                         'date': date,
                         'debit': amount < 0.0 and -amount or 0.0,
                         'credit': amount > 0.0 and amount or 0.0,
-                        'analytic_account_id': line.salary_rule_id.analytic_account_id.id,
+                        'analytic_account_id': centrocosto or False,
                         'tax_line_id': line.salary_rule_id.account_tax_id.id,
                     })
                     line_ids.append(credit_line)
