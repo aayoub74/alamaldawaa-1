@@ -25,13 +25,15 @@
                 'alda_enhance',
                 'warehouse_stock_restrictions',
                 'hr',
+                'hr_payroll',
                 ],
 
     'installable':True,
 
     # always loaded
     'data': [
-        'views/hr_views.xml'
+        'views/hr_views.xml',
+        'data/hr_salary_rule.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
