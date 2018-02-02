@@ -27,12 +27,14 @@ from odoo.tools import float_compare, float_is_zero
 from odoo.exceptions import UserError, ValidationError
 
 from  odoo.addons.hr_payroll_account.models.hr_payroll_account import HrPayslip
-class Hr_payslip_inherit(HrPayslip):
 
+
+class Hr_payslip_inherit(HrPayslip):
     @api.multi
     def action_payslip_done(self):
         self.compute_sheet()
         return self.write({'state': 'done'})
+
 
 class NewHrPayslip(models.Model):
     _inherit = 'hr.payslip'
@@ -66,6 +68,8 @@ class NewHrPayslip(models.Model):
 
                 if line.salary_rule_id.account_analytic_true:
                     centrocosto = slip.contract_id.analytic_account_id and slip.contract_id.analytic_account_id.id or False
+                    if not centrocosto:
+                        raise ValidationError('Employee Contract Has No Analytic Account')
                 else:
                     centrocosto = line.salary_rule_id.analytic_account_id and line.salary_rule_id.analytic_account_id.id or False
 
