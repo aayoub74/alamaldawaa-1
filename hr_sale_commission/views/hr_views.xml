@@ -6,6 +6,15 @@
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page name="commission" string="Commission">
+                        <group col="4">
+                            <field name="target_val" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="commission"/>
+                        </group>
+                    </page>
+
+                </notebook>
                 <div name="button_box" position="inside">
                     <field name="currency_id" invisible="1"/>
                     <button type="object" class="oe_stat_button" id="invoice_button" icon="fa-pencil-square-o" name="action_get_invoices">

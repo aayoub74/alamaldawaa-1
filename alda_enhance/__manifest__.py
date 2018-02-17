@@ -26,6 +26,7 @@
         'product_expiry',
         'hr_contract',
         'sale',
+        'bi_purchase_discount',
         ],
 
     # always loaded

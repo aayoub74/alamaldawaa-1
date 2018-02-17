@@ -21,7 +21,9 @@ class HrPayslip(models.Model):
                 return False
 
         total_invoice_by_month = employee._get_total_invoices_per_month(employee)
-        return sum([price['total'] for price in total_invoice_by_month if check_date_between(price['date'],date_from,date_to)])
+        com_in_range = sum([price['total'] for price in total_invoice_by_month if check_date_between(price['date'],date_from,date_to)])
+        com_in_range = (com_in_range * employee.commission) /100 if com_in_range >=  employee.target_val else 0
+        return com_in_range
 
 
 
