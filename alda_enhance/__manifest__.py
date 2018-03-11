@@ -26,7 +26,11 @@
         'product_expiry',
         'hr_contract',
         'sale',
+<<<<<<< HEAD
         'sale_contract',
+=======
+        'bi_purchase_discount',
+>>>>>>> 06963dd6358f463f778e7f248dc2ffa492701a7a
         ],
 
     # always loaded
