@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_contract_management_contract_management,contract_management.contract_management,model_contract_management_contract_management,,1,0,0,0
