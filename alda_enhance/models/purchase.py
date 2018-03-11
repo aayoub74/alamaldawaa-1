@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.tools.float_utils import  float_compare
+from odoo.tools.float_utils import float_compare
 from odoo.addons import decimal_precision as dp
 
 from odoo.tools.translate import _
@@ -36,9 +36,16 @@ class PurhcaseOrderLine(models.Model):
 
     @api.onchange('product_id')
     def onchange_product_id(self):
-        super(PurhcaseOrderLine,self).onchange_product_id()
+        super(PurhcaseOrderLine, self).onchange_product_id()
         if not self.price_unit and self.product_id:
             self.price_unit = self.product_id.lst_price
+        purchase_obj = self.env['purchase.order.line']
+        if self.partner_id and self.product_id:
+            purchase_data = purchase_obj.search(
+                [('product_id', '=', self.product_id.id), ('partner_id', '=', self.partner_id.id)], order='bonus desc',
+                limit=1)
+            if purchase_data:
+                self.bonus = purchase_data[0].bonus
 
     @api.depends('bonus', 'product_qty')
     def _compute_total(self):
@@ -63,9 +70,10 @@ class PurhcaseOrderLine(models.Model):
         price_unit -= price_unit * (line.bonus / line.total_qty)
         d1 = line.discount / 100.0
         d2 = line.discount2 / 100.0
-        price_unit = price_unit * (1 - d1 - d2 + d1 * d2) #percentage discount
-        price_unit -= line.fixed_discount / line.total_qty if line.total_qty else 0 #fixed discount per line
-        price_unit -= ((line.price_subtotal/line.order_id.total_before_fixed_discount) * line.order_id.fixed_discount)/line.total_qty if line.order_id.total_before_fixed_discount and line.total_qty else 0 #total fixed discount
+        price_unit = price_unit * (1 - d1 - d2 + d1 * d2)  # percentage discount
+        price_unit -= line.fixed_discount / line.total_qty if line.total_qty else 0  # fixed discount per line
+        price_unit -= ((
+                       line.price_subtotal / line.order_id.total_before_fixed_discount) * line.order_id.fixed_discount) / line.total_qty if line.order_id.total_before_fixed_discount and line.total_qty else 0  # total fixed discount
         return price_unit
 
     @api.multi

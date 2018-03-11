@@ -1,0 +1,63 @@
+<odoo>
+    <data>
+        <!-- Inherit Form View to Modify it -->
+        <record id="invoice_form_inherit" model="ir.ui.view">
+            <field name="name">Account Invoice Form Inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <page name="other_info" position="after">
+                    <page name="Payments" string="Payments" attrs="{'invisible': [('is_contract', '=', False)]}">
+                        <group>
+                            <field name="number_of_installment" attrs="{'required': [('is_contract', '=', True)]}"/>
+                            <field name="is_contract" invisible="1" />
+                            <field name="number_of_months" attrs="{'required': [('is_contract', '=', True)]}"/>
+                            <field name="contract_end_date"/>
+                            <field name="payment_method_id" attrs="{'required': [('is_contract', '=', True)]}"/>
+                            <field name="installment_journal_id" attrs="{'required': [('is_contract', '=', True)]}"/>
+                            <button name="generate_installments" string="Generate Installements" type="object"/>
+                        </group>
+                        <field name="installment_ids">
+                            <!--<tree decoration-muted="state == 'draft'" decoration-info="state=='posted'">-->
+                            <tree decoration-warning="state == 'draft'" decoration-danger="state == False"
+                                  decoration-info="state=='posted'">
+                                <field name="state" invisible="1"/>
+                                <field name="amount"/>
+                                <field name="payment_method_id"/>
+                                <field name="installment_journal_id"/>
+                                <field name="installment_date"/>
+                                <button name="generate_payment" string="Generate Payment" type="object"
+                                        attrs="{'invisible': [('state', '!=', False),],}"/>
+                            </tree>
+                        </field>
+                    </page>
+                </page>
+
+            </field>
+        </record>
+        <record id="contract_action_invoice_tree2" model="ir.actions.act_window">
+            <field name="name">Vendor Bills</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field eval="False" name="view_id"/>
+            <field name="domain">[('type','=','in_invoice'),('is_contract','=',True)]</field>
+            <field name="context">{'default_type': 'in_invoice','default_is_contract':True, 'type': 'in_invoice', 'journal_type': 'purchase'}
+            </field>
+            <field name="search_view_id" ref="account.view_account_invoice_filter_inherit_invoices"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to record a new vendor bill.
+                </p>
+                <p>
+                    You can control the invoice from your vendor according to
+                    what you purchased or received.
+                </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="menu_contracts_management" name="Contracts" parent="account.menu_finance"
+                  action="contract_action_invoice_tree2" sequence="10"/>
+    </data>
+</odoo>

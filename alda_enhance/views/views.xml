@@ -350,5 +350,9 @@
                 </field>
             </field>
         </record>
+        <record id="account.action_move_journal_line" model="ir.actions.act_window">
+            <field name="context">{}</field>
+
+        </record>
     </data>
 </odoo>

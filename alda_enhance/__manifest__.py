@@ -26,6 +26,7 @@
         'product_expiry',
         'hr_contract',
         'sale',
+        'sale_contract',
         ],
 
     # always loaded

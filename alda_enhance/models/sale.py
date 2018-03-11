@@ -74,6 +74,11 @@ class SaleOrder(models.Model):
         res['fixed_discount'] = self.fixed_discount
         return res
 
+    def _compute_subscription(self):
+        for order in self:
+            if order.project_id:
+                order.subscription_id = self.env['sale.subscription'].search([('analytic_account_id', '=', order.project_id.id)], limit=1)
+
 
 
 class SaleOrderLine(models.Model):
