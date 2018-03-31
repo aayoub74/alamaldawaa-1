@@ -20,13 +20,16 @@
 
     # any module necessary for this one to work correctly
     'depends': ['base',
-        'product',
-        'purchase',
-        'base_action_rule',
-        'product_expiry',
-        'hr_contract',
-        'sale',
-        ],
+                'product',
+                'purchase',
+                'base_action_rule',
+                'product_expiry',
+                'hr_contract',
+                'sale',
+                'account',
+                'sale_contract',
+                'bi_purchase_discount',
+                ],
 
     # always loaded
     'data': [

@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.tools.float_utils import  float_compare
+from odoo.tools.float_utils import float_compare
 from odoo.addons import decimal_precision as dp
 
 from odoo.tools.translate import _
@@ -36,7 +36,7 @@ class PurhcaseOrderLine(models.Model):
 
     @api.onchange('product_id')
     def onchange_product_id(self):
-        super(PurhcaseOrderLine,self).onchange_product_id()
+        super(PurhcaseOrderLine, self).onchange_product_id()
         if not self.price_unit and self.product_id:
             self.price_unit = self.product_id.lst_price
 
