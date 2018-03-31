@@ -38,6 +38,10 @@ class AccountInvoice(models.Model):
 
 
 
+    @api.onchange('fixed_discount')
+    def _onchange_fixed_discount(self):
+        return self._onchange_invoice_line_ids()
+
     @api.one
     @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id', 'date_invoice',
                  'type','fixed_discount')
@@ -63,7 +67,8 @@ class AccountInvoice(models.Model):
         for line in self.invoice_line_ids:
             d1 = line.discount / 100.0
             d2 = line.discount2 / 100.0
-            price_unit = line.price_unit * (1 - d1-d2+d1*d2) - line.fixed_discount
+            price_unit = line.price_unit * (1 - d1-d2+d1*d2) - (line.fixed_discount/line.quantity if line.quantity else 1)
+            price_unit -= (self.fixed_discount /self.before_discount) * price_unit
             taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
             for tax in taxes:
                 val = self._prepare_tax_line_vals(line, tax)

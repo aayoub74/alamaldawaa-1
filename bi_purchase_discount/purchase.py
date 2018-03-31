@@ -67,14 +67,15 @@ class PurchaseOrderLine(models.Model):
     @api.depends('product_qty', 'price_unit', 'taxes_id','discount','discount2','fixed_discount')
     def _compute_amount(self):
         for line in self:
-            taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
             d1 = line.discount / 100.0
             d2 = line.discount2 / 100.0
-            discount = (line.price_unit * line.product_qty) * (d1+d2-d1*d2)
+            price_unit = line.price_unit * (1 - d1 - d2 + d1 * d2) - line.fixed_discount
+            taxes = line.taxes_id.compute_all(price_unit, line.order_id.currency_id, line.product_qty,
+                                              product=line.product_id, partner=line.order_id.partner_id)
             line.update({
                 'price_tax': taxes['total_included'] - taxes['total_excluded'],
                 'price_total': taxes['total_included'] ,
-                'price_subtotal': taxes['total_excluded'] - discount- line.fixed_discount,
+                'price_subtotal': taxes['total_excluded'],
             })
 
 

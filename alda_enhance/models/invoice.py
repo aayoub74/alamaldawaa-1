@@ -75,14 +75,15 @@ class InvoiceLine(models.Model):
         currency = self.invoice_id and self.invoice_id.currency_id or None
         d1 = self.discount / 100.0
         d2 = self.discount2 / 100.0
-        price = self.price_unit * (1 - d1 - d2 + d1 * d2) - self.fixed_discount / self.quantity if self.quantity else 0
+        price = self.price_unit * (1 - d1 - d2 + d1 * d2) - self.fixed_discount / self.quantity if self.quantity else 1
+        price_base = price - ((self.invoice_id.fixed_discount /self.invoice_id.before_discount) * price)
         total = {
             'total_excluded':self.quantity * price,
             'total_included':self.quantity * price,
             'total_tax':0.0,
         }
         if self.invoice_line_tax_ids:
-            total = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
+            total = self.invoice_line_tax_ids.compute_all(price_base, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
             total['total_tax'] = total['total_included'] - total['total_excluded']
         return total
 
