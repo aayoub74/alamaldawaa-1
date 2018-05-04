@@ -69,7 +69,7 @@ class PurchaseOrderLine(models.Model):
         for line in self:
             d1 = line.discount / 100.0
             d2 = line.discount2 / 100.0
-            price_unit = line.price_unit * (1 - d1 - d2 + d1 * d2) - line.fixed_discount
+            price_unit = line.price_unit * (1 - d1 - d2 + d1 * d2) - line.fixed_discount/line.product_qty if line.product_qty else 0
             taxes = line.taxes_id.compute_all(price_unit, line.order_id.currency_id, line.product_qty,
                                               product=line.product_id, partner=line.order_id.partner_id)
             line.update({

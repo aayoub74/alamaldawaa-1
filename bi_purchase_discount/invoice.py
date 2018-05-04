@@ -68,7 +68,8 @@ class AccountInvoice(models.Model):
             d1 = line.discount / 100.0
             d2 = line.discount2 / 100.0
             price_unit = line.price_unit * (1 - d1-d2+d1*d2) - (line.fixed_discount/line.quantity if line.quantity else 1)
-            price_unit -= (self.fixed_discount /self.before_discount) * price_unit
+            if self.before_discount:
+                price_unit -= (self.fixed_discount /self.before_discount) * price_unit
             taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
             for tax in taxes:
                 val = self._prepare_tax_line_vals(line, tax)
