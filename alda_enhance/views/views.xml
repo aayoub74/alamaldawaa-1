@@ -1,7 +1,5 @@
 <odoo>
     <data>
-        <!-- Product -->
-
         <record id="view_product_temp_tree_inherit" model="ir.ui.view">
             <field name="name">Product tree View Extra Info</field>
             <field name="model">product.template</field>
@@ -153,6 +151,9 @@
                 <field name="quantity" position="after">
                     <field name="bonus"/>
                 </field>
+                <field name="product_id" position="attributes">
+                    <attribute name="domain">[('type','!=','product')]</attribute>
+                </field>
             </field>
         </record>
 
@@ -162,6 +163,10 @@
             <field name="type">form</field>
             <field name="inherit_id" ref="account.invoice_form"/>
             <field name="arch" type="xml">
+                <field name="product_id" position="attributes">
+                    <attribute name="domain">[('type','!=','product')]</attribute>
+                </field>
+
                 <field name="quantity" position="after">
                     <field name="bonus"/>
                 </field>
@@ -226,6 +231,7 @@
                 </xpath>
                 <field name="create_date" position="after">
                     <field name="life_date"/>
+                    <field name="product_qty"/>
                     <field name="expiry_state"/>
                 </field>
             </field>
@@ -353,5 +359,32 @@
         <record id="account.action_move_journal_line" model="ir.actions.act_window">
             <field name="context">{}</field>
         </record>
+        <!-- Inherit Form View to Modify it -->
+        <record id="product_search_view_alda" model="ir.ui.view">
+            <field name="name">product.template.search.category</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <field name="pricelist_id" position="after">
+                    <group expand="0" name="group_by" string="Group By">
+                        <filter name="category" string="Internal Category" domain="[]"
+                                context="{'group_by' : 'categ_id'}"/>
+                    </group>
+                </field>
+            </field>
+        </record>
+        <record id="payslip_form_view_inherit" model="ir.ui.view">
+            <field name="name">Payslip Form Inherit</field>
+            <field name="model">hr.payslip</field>
+            <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+            <field name="arch" type="xml">
+
+                <field name="credit_note" position="after">
+                    <field name="allowance_amount"/>
+                    <field name="deduction_amount"/>
+                </field>
+            </field>
+        </record>
+
     </data>
 </odoo>

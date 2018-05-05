@@ -1,0 +1,27 @@
+<odoo>
+    <data>
+        <record id="hr_salary_rule_overtime_allowance" model="hr.salary.rule">
+            <field name="code">ALW</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result=payslip.allowance_amount
+            </field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="name">Allowance</field>
+            <field name="sequence" eval="51"/>
+            <field name="note">Reward Added Directly to payslip</field>
+        </record>
+
+        <record id="hr_salary_rule_latness_deductions" model="hr.salary.rule">
+            <field name="code">DED</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result=-payslip.deduction_amount
+            </field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="name">Deduction</field>
+            <field name="sequence" eval="52"/>
+            <field name="note">Added Directly to payslip
+            </field>
+        </record>
+
+    </data>
+</odoo>

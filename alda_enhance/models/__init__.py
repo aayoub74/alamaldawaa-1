@@ -9,3 +9,4 @@ from . import hr
 from . import payment
 from . import partners
 from . import scrap_wizard
+from . import payslip

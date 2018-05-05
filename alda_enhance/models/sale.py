@@ -2,17 +2,18 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError
 from odoo.tools.translate import _
 from odoo.addons import decimal_precision as dp
-from odoo.tools import float_compare,DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    READONLY_STATES= {
-        'sale':[('readonly', True)],
-        'done':[('readonly', True)],
-        'cancel':[('readonly', True)],
+    READONLY_STATES = {
+        'sale': [('readonly', True)],
+        'done': [('readonly', True)],
+        'cancel': [('readonly', True)],
     }
 
     fixed_discount = fields.Float('Discount', digits=dp.get_precision('Discount'), states=READONLY_STATES)
@@ -21,12 +22,12 @@ class SaleOrder(models.Model):
     type_invoice_policy = fields.Selection(
         selection=[('normal', 'By Product'),
                    ('prepaid', 'Before Delivery')],
-        related='warehouse_id.type_invoice_policy',readonly=True
+        related='warehouse_id.type_invoice_policy', readonly=True
     )
 
-    is_paid = fields.Boolean(string="Is paid?",compute='_check_payment')
+    is_paid = fields.Boolean(string="Is paid?", compute='_check_payment')
 
-    @api.depends('order_line.invoice_lines.invoice_id.state','order_line.product_uom_qty','order_line.qty_invoiced')
+    @api.depends('order_line.invoice_lines.invoice_id.state', 'order_line.product_uom_qty', 'order_line.qty_invoiced')
     def _check_payment(self):
         for rec in self:
             precision = self.env['decimal.precision'].precision_get(
@@ -36,15 +37,15 @@ class SaleOrder(models.Model):
                 float_compare(
                     line.product_uom_qty, line.qty_invoiced,
                     precision_digits=precision) > 0
-            for line in rec.order_line) else True
+                for line in rec.order_line) else True
 
-    @api.depends('order_line.price_total','fixed_discount')
+    @api.depends('order_line.price_total', 'fixed_discount')
     def _amount_all(self):
         """
         Compute the total amounts of the SO.
         """
         for order in self:
-            amount_untaxed = amount_tax = total_before_fixed_discount =0.0
+            amount_untaxed = amount_tax = total_before_fixed_discount = 0.0
             for line in order.order_line:
                 total_before_fixed_discount += line.price_subtotal
                 # FORWARDPORT UP TO 10.0
@@ -74,12 +75,6 @@ class SaleOrder(models.Model):
         res['fixed_discount'] = self.fixed_discount
         return res
 
-    def _compute_subscription(self):
-        for order in self:
-            if order.project_id:
-                order.subscription_id = self.env['sale.subscription'].search([('analytic_account_id', '=', order.project_id.id)], limit=1)
-
-
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -94,11 +89,16 @@ class SaleOrderLine(models.Model):
     discount2 = fields.Float('Discount 2 (%)', digits=dp.get_precision('Discount'))
     fixed_discount = fields.Float('Discount', digits=dp.get_precision('Discount'))
 
+    @api.onchange('product_id')
+    def product_id_change(self):
+        domain = super(SaleOrderLine, self).product_id_change()
+        self.discount = self.product_id.sale_discount
+        self.discount2 = self.product_id.sale_discount2
+        return domain
 
-    # @api.onchange('product_id')
-    # def get_discount(self):
-    #     self.discount2 = self.product_id.sale_discount
-
+    @api.onchange('product_id', 'price_unit', 'product_uom', 'product_uom_qty', 'tax_id')
+    def _onchange_discount(self):
+        self.discount = self.product_id.sale_discount
 
     @api.depends('bonus', 'product_uom_qty')
     def _compute_total(self):
@@ -106,7 +106,7 @@ class SaleOrderLine(models.Model):
         for record in self:
             record.total_qty = record.bonus + record.product_uom_qty
 
-    @api.depends('product_uom_qty', 'discount', 'discount2', 'price_unit', 'tax_id','fixed_discount')
+    @api.depends('product_uom_qty', 'discount', 'discount2', 'price_unit', 'tax_id', 'fixed_discount')
     def _compute_amount(self):
         """
         Compute the amounts of the SO line.
@@ -184,8 +184,8 @@ class SaleOrderLine(models.Model):
             vals['product_qty'] = line.total_qty - qty
             new_proc = self.env["procurement.order"].with_context(procurement_autorun_defer=True).create(vals)
             new_proc.message_post_with_view('mail.message_origin_link',
-                values={'self': new_proc, 'origin': line.order_id},
-                subtype_id=self.env.ref('mail.mt_note').id)
+                                            values={'self': new_proc, 'origin': line.order_id},
+                                            subtype_id=self.env.ref('mail.mt_note').id)
             new_procs += new_proc
         new_procs.run()
         return new_procs
@@ -193,10 +193,10 @@ class SaleOrderLine(models.Model):
     @api.multi
     def _prepare_invoice_line(self, qty):
         self.ensure_one()
-        res  = super(SaleOrderLine, self)._prepare_invoice_line(qty)
+        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
         res['discount2'] = self.discount2
         res['fixed_discount'] = self.fixed_discount
-        return  res
+        return res
 
 
 class ProcurementOrder(models.Model):
@@ -214,7 +214,8 @@ class ProcurementOrder(models.Model):
             group_id = self.group_id.id
         elif self.rule_id.group_propagation_option == 'fixed':
             group_id = self.rule_id.group_id.id
-        date_expected = (datetime.strptime(self.date_planned, DEFAULT_SERVER_DATETIME_FORMAT) - relativedelta(days=self.rule_id.delay or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        date_expected = (datetime.strptime(self.date_planned, DEFAULT_SERVER_DATETIME_FORMAT) - relativedelta(
+            days=self.rule_id.delay or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         # it is possible that we've already got some move done, so check for the done qty and create
         # a new move with the correct qty
         qty_done = sum(self.move_ids.filtered(lambda move: move.state == 'done').mapped('product_uom_qty'))
@@ -228,7 +229,8 @@ class ProcurementOrder(models.Model):
             'product_id': self.product_id.id,
             'product_uom': self.product_uom.id,
             'product_uom_qty': qty_left,
-            'partner_id': self.rule_id.partner_address_id.id or (self.group_id and self.group_id.partner_id.id) or False,
+            'partner_id': self.rule_id.partner_address_id.id or (
+                self.group_id and self.group_id.partner_id.id) or False,
             'location_id': self.rule_id.location_src_id.id,
             'location_dest_id': self.location_id.id,
             'move_dest_id': self.move_dest_id and self.move_dest_id.id or False,

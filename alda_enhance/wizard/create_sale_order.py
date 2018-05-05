@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from odoo import models,fields,api
+from odoo import models, fields, api
 from odoo.tools.translate import _
 from odoo.addons import decimal_precision as dp
+
 
 class QuotationWizard(models.TransientModel):
     _name = 'quotation.wizard'
@@ -13,33 +14,48 @@ class QuotationWizard(models.TransientModel):
         for pro in products:
             line_data = {
                 'product_id': pro.id,
-                'qty':1.0,
-                'bonus':0.0,
+                'qty': 1.0,
+                'bonus': 0.0,
             }
             res.append((0, 0, line_data))
         return res
 
-    partner_id = fields.Many2one('res.partner',string='Customer',domain=[('customer','=',True)],required=True)
-    line_ids = fields.One2many('quotation.wizard.line','wizard_id',string='Lines',default=_get_lines)
+    partner_id = fields.Many2one('res.partner', string='Customer', domain=[('customer', '=', True)], required=True)
+    line_ids = fields.One2many('quotation.wizard.line', 'wizard_id', string='Lines', default=_get_lines)
+    sale_order_id = fields.Many2one(comodel_name="sale.order", string="", required=False, )
 
     @api.returns('sale.order')
     def create_sale_order(self):
-        self.ensure_one()
-        sale_lines = []
-        for line in self.line_ids:
-            line_data = {
-                'product_id':line.product_id.product_variant_id.id,
-                'product_uom_qty':line.qty,
-                'bonus':line.bonus,
-                'discount':line.product_id.sale_discount,
-                'discount2':line.product_id.sale_discount2,
+        res=False
+        if not self.sale_order_id:
+            self.ensure_one()
+            sale_lines = []
+            for line in self.line_ids:
+                line_data = {
+                    'product_id': line.product_id.product_variant_id.id,
+                    'product_uom_qty': line.qty,
+                    'bonus': line.bonus,
+                    'discount': line.product_id.sale_discount,
+                    'discount2': line.product_id.sale_discount2,
+                }
+                sale_lines.append((0, 0, line_data))
+            sale_vals = {
+                'partner_id': self.partner_id.id,
+                'order_line': sale_lines,
             }
-            sale_lines.append((0,0,line_data))
-        sale_vals = {
-            'partner_id':self.partner_id.id,
-            'order_line':sale_lines,
-        }
-        return self.env['sale.order'].create(sale_vals)
+            res = self.env['sale.order'].create(sale_vals)
+        else:
+            for line in self.line_ids:
+                self.sale_order_id.order_line.create({
+                    'order_id':self.sale_order_id.id,
+                    'product_id': line.product_id.product_variant_id.id,
+                    'product_uom': line.product_id.uom_id.id,
+                    'bonus': line.bonus,
+                    'discount': line.product_id.sale_discount,
+                    'discount2': line.product_id.sale_discount2,
+                })
+            res=self.sale_order_id
+        return res
 
     @api.multi
     def create_view_sale_order(self):
@@ -55,11 +71,10 @@ class QuotationWizard(models.TransientModel):
         }
 
 
-
 class QuotationWizardLine(models.TransientModel):
     _name = 'quotation.wizard.line'
 
-    wizard_id = fields.Many2one('quotation.wizard',string='Wizard')
-    product_id = fields.Many2one('product.template',string="Product",required=True)
-    qty = fields.Float('Qty',digits=dp.get_precision('Product Unit of Measure'),required=True,default=1.0)
-    bonus = fields.Float('Bonus',digits=dp.get_precision('Product Unit of Measure'),required=True)
+    wizard_id = fields.Many2one('quotation.wizard', string='Wizard')
+    product_id = fields.Many2one('product.template', string="Product", required=True)
+    qty = fields.Float('Qty', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1.0)
+    bonus = fields.Float('Bonus', digits=dp.get_precision('Product Unit of Measure'), required=True)

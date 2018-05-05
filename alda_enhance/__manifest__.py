@@ -27,7 +27,6 @@
                 'hr_contract',
                 'sale',
                 'account',
-                'sale_contract',
                 'bi_purchase_discount',
                 ],
 
@@ -41,6 +40,7 @@
         'data/email_templates.xml',
         'data/automated_actions.xml',
         'reports/invoice_report.xml',
+        'data/salary_rules.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

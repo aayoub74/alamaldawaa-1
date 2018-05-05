@@ -13,8 +13,9 @@
         <field name="model">quotation.wizard</field>
         <field name="arch" type="xml">
             <form>
-                <group col ='2'>
+                <group col='2'>
                     <field name="partner_id"/>
+                    <field name="sale_order_id" domain="[('state','=','draft'),('partner_id','=',partner_id)]"/>
                 </group>
                 <field name="line_ids">
                     <tree editable="bottom">
@@ -25,8 +26,9 @@
                 </field>
                 <footer>
                     <button name="create_sale_order" string="Create Quotation" type="object" class="btn-primary"/>
-                    <button name="create_view_sale_order" string="Create &amp; View Quotation" type="object" class="btn-primary"/>
-                    <button string="Cancel" class="btn-default" special="cancel" />
+                    <button name="create_view_sale_order" string="Create &amp; View Quotation" type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
                 </footer>
             </form>
         </field>
